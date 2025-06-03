@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type = Application
-Name = Rikuchiy
+Name = GNOME TypeScript Template
 Icon = @icon@
 TryExec = @try_exec@
 Exec = @exec@
