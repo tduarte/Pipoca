@@ -4,6 +4,7 @@ import GObject from "gi://GObject";
 
 import MainWindow from "./main-window.js";
 
+// FIXME: Choose a namespace that fits your app
 const options = {GTypeName: "ExampleApp"};
 
 class App extends Adw.Application {
@@ -22,6 +23,7 @@ class App extends Adw.Application {
   public override vfunc_startup(): void {
     super.vfunc_startup();
 
+    // FIXME: Update this with your app name
     GLib.set_application_name("GNOME TypeScript Template");
     GLib.set_prgname("gnome-ts-template");
 

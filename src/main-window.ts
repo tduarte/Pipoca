@@ -7,6 +7,7 @@ import {gettext as _} from "gettext";
 import Template from "./main-window.ui";
 import GLib from "gi://GLib";
 
+// FIXME: Choose a namespace that fits your app
 const options = {GTypeName: "ExampleMainWindow", Template};
 
 class MainWindow extends Adw.ApplicationWindow {
@@ -44,6 +45,8 @@ class MainWindow extends Adw.ApplicationWindow {
   }
 
   private showAboutDialog(): void {
+    // FIXME: Update the info here to something that fits your project
+
     const dialog = new Adw.AboutDialog({
       applicationIcon: Config.APP_ID,
       applicationName: GLib.get_application_name() ?? "",

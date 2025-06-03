@@ -3,9 +3,9 @@
 import Gio from "gi://Gio";
 import GLib from "gi://GLib";
 
-import { setConsoleLogDomain } from "console";
-import { bindtextdomain, textdomain } from "gettext";
-import { exit, programArgs, programInvocationName } from "system";
+import {setConsoleLogDomain} from "console";
+import {bindtextdomain, textdomain} from "gettext";
+import {exit, programArgs, programInvocationName} from "system";
 
 import "gi://Adw?version=1";
 
@@ -28,14 +28,14 @@ Gio.resources_register(
   ),
 );
 
-const { default: App } = await import(
+const {default: App} = await import(
   GLib.filename_to_uri(
     GLib.build_filenamev([Config.PKGDATADIR, "app.js"]),
     null,
   )
 );
 
-const app = new App({ applicationId: Config.APP_ID });
+const app = new App({applicationId: Config.APP_ID});
 const exitCode = await app.runAsync([programInvocationName, ...programArgs]);
 
 exit(exitCode);
