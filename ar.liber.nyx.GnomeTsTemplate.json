@@ -1,0 +1,33 @@
+{
+  "id": "ar.liber.nyx.GnomeTsTemplate",
+  "command": "gnome-ts-template",
+  "runtime": "org.gnome.Platform",
+  "runtime-version": "48",
+  "sdk": "org.gnome.Sdk",
+  "sdk-extensions": ["org.freedesktop.Sdk.Extension.node24"],
+  "build-options": {
+    "prepend-path": "/usr/lib/sdk/node24/bin",
+    "prepend-ld-library-path": "/usr/lib/sdk/node24/lib"
+  },
+  "finish-args": [
+    "--share=ipc",
+    "--socket=wayland",
+    "--socket=fallback-x11",
+    "--device=dri"
+  ],
+  "modules": [
+    {
+      "name": "gnome-ts-template",
+      "buildsystem": "meson",
+      "build-options": {
+        "build-args": ["--share=network"]
+      },
+      "sources": [
+        {
+          "type": "dir",
+          "path": "."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+*.png filter=lfs diff=lfs merge=lfs -text
+
+meson.build linguist-documentation
+meson_options.txt linguist-documentation
+*.config.js linguist-documentation

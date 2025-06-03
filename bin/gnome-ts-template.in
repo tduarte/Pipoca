@@ -1,0 +1,41 @@
+#!/usr/bin/env -S gjs -m
+
+import Gio from "gi://Gio";
+import GLib from "gi://GLib";
+
+import { setConsoleLogDomain } from "console";
+import { bindtextdomain, textdomain } from "gettext";
+import { exit, programArgs, programInvocationName } from "system";
+
+import "gi://Adw?version=1";
+
+globalThis.Config ??= {};
+Config.APP_ID = "@app_id@";
+Config.DATADIR = "@datadir@";
+Config.GETTEXT_PACKAGE = "@gettext_package@";
+Config.LOCALEDIR = "@localedir@";
+Config.PKGDATADIR = "@pkgdatadir@";
+Config.VERSION = "@version@";
+
+bindtextdomain(Config.GETTEXT_PACKAGE, Config.LOCALEDIR);
+textdomain(Config.GETTEXT_PACKAGE);
+// FIXME: Choose a log domain that fits your app
+setConsoleLogDomain("GnomeTsTemplate");
+
+Gio.resources_register(
+  Gio.Resource.load(
+    GLib.build_filenamev([Config.PKGDATADIR, `${Config.APP_ID}.gresource`]),
+  ),
+);
+
+const { default: App } = await import(
+  GLib.filename_to_uri(
+    GLib.build_filenamev([Config.PKGDATADIR, "app.js"]),
+    null,
+  )
+);
+
+const app = new App({ applicationId: Config.APP_ID });
+const exitCode = await app.runAsync([programInvocationName, ...programArgs]);
+
+exit(exitCode);
