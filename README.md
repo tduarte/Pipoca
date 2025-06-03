@@ -67,7 +67,7 @@ builds, then this is the method for you.
    SDK extension:
 
    ```sh
-   flatpak install --user                          \
+   flatpak install --user                        \
    	org.flatpak.Builder//stable                 \
    	org.gnome.Sdk//48                           \
    	org.gnome.Platform//48                      \
@@ -84,7 +84,7 @@ builds, then this is the method for you.
    directory:
 
    ```sh
-   flatpak run org.flatpak.Builder       \
+   flatpak run org.flatpak.Builder     \
    	--force-clean                     \
    	--install                         \
    	--user                            \
@@ -102,12 +102,12 @@ template using your distribution's dependencies, then this is the method for
 you.
 
 1. Install `desktop-file-utils`, `gettext`, Git, Git LFS, GJS, GLib, GTK,
-   libadwaita, Meson, and Node.js using the appropriate methods for your
+   `libadwaita`, Meson, and Node.js using the appropriate methods for your
    distribution.
 
    ```sh
    # For Ubuntu (or any Debian-based distro)
-   sudo apt install       \
+   sudo apt install     \
    	desktop-file-utils \
    	gettext            \
    	git                \
@@ -121,7 +121,7 @@ you.
    	npm
 
    # For Fedora (or any distro from the Red Hat family)
-   sudo dnf install       \
+   sudo dnf install     \
    	desktop-file-utils \
    	gettext            \
    	git                \
