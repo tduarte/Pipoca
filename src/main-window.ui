@@ -5,20 +5,22 @@
     <property name="default-width">600</property>
 
     <property name="content">
-      <object class="AdwToolbarView">
-        <child type="top">
-          <object class="AdwHeaderBar">
-            <child type="end">
-              <object class="GtkMenuButton">
-                <property name="direction">none</property>
-                <property name="menu-model">primary-menu</property>
-                <property name="primary">yes</property>
+      <object class="GtkOverlay">
+        <child>
+          <object class="AdwToolbarView">
+            <child type="top">
+              <object class="AdwHeaderBar">
+                <child type="end">
+                  <object class="GtkMenuButton">
+                    <property name="direction">none</property>
+                    <property name="menu-model">primary-menu</property>
+                    <property name="primary">yes</property>
+                  </object>
+                </child>
               </object>
             </child>
-          </object>
-        </child>
 
-        <property name="content">
+            <property name="content">
           <object class="AdwClamp">
             <property name="maximum-size">600</property>
             <property name="margin-top">24</property>
@@ -96,7 +98,7 @@
                             
                             <child>
                               <object class="GtkImage" id="file-type-icon">
-                                <property name="icon-name">text-x-generic-symbolic</property>
+                                <property name="icon-name">application-x-srt</property>
                                 <property name="pixel-size">64</property>
                               </object>
                             </child>
@@ -144,13 +146,7 @@
                         <property name="subtitle" translatable="yes">Choose the model for translation</property>
                       </object>
                     </child>
-                    <child>
-                      <object class="AdwSwitchRow" id="auto-save-row">
-                        <property name="title" translatable="yes">Auto Save</property>
-                        <property name="subtitle" translatable="yes">Save to same folder (.en.srt)</property>
-                        <property name="active">true</property>
-                      </object>
-                    </child>
+
                   </object>
                 </child>
 
@@ -210,14 +206,7 @@
                   <object class="GtkBox">
                     <property name="orientation">vertical</property>
                     <property name="spacing">12</property>
-                    <child>
-                      <object class="GtkProgressBar" id="progress-bar">
-                        <property name="visible">false</property>
-                        <style>
-                          <class name="osd" />
-                        </style>
-                      </object>
-                    </child>
+
                     <child>
                       <object class="GtkLabel" id="status-label">
                         <property name="label" translatable="yes"></property>
@@ -233,6 +222,23 @@
             </child>
           </object>
         </property>
+          </object>
+        </child>
+        
+        <!-- OSD Progress Bar Overlay -->
+        <child type="overlay">
+          <object class="GtkProgressBar" id="progress-bar">
+            <property name="visible">false</property>
+            <property name="halign">fill</property>
+            <property name="valign">start</property>
+            <property name="margin-top">8</property>
+            <property name="margin-start">8</property>
+            <property name="margin-end">8</property>
+            <style>
+              <class name="osd" />
+            </style>
+          </object>
+        </child>
       </object>
     </property>
   </template>

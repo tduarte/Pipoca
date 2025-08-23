@@ -8,6 +8,8 @@
 
 [![Built with GTK4](https://img.shields.io/badge/Built%20with-GTK4-blue.svg)](https://gtk.org/)
 [![Powered by Libadwaita](https://img.shields.io/badge/Powered%20by-Libadwaita-green.svg)](https://gnome.pages.gitlab.gnome.org/libadwaita/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Flatpak](https://img.shields.io/badge/Flatpak-4A90E2?logo=flathub&logoColor=white)](https://flatpak.org/)
 
 </div>
 

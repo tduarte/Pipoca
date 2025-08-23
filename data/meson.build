@@ -66,6 +66,11 @@ install_data(
   install_dir: datadir / 'icons/hicolor/symbolic/apps',
 )
 
+install_data(
+  'icons/application-x-srt.svg',
+  install_dir: datadir / 'icons/hicolor/scalable/mimetypes',
+)
+
 metadata_file = i18n.merge_file(
   input: configure_file(
     configuration: {

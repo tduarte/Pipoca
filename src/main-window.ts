@@ -24,7 +24,7 @@ const options = {
     "change-file-button",
     "target-language-row", 
     "model-row",
-    "auto-save-row",
+
     "translate-button",
     "progress-bar",
     "status-label",
@@ -82,7 +82,7 @@ class MainWindow extends Adw.ApplicationWindow {
     const changeFileButton = (this as any)._change_file_button as Gtk.Button;
     const targetLangRow = (this as any)._target_language_row as Adw.ComboRow;
     const modelRow = (this as any)._model_row as Adw.ComboRow;
-    const autoSaveRow = (this as any)._auto_save_row as Adw.SwitchRow;
+
     const translateBtn = (this as any)._translate_button as Gtk.Button;
     const progressBar = (this as any)._progress_bar as Gtk.ProgressBar;
     const statusLabel = (this as any)._status_label as Gtk.Label;
@@ -99,8 +99,8 @@ class MainWindow extends Adw.ApplicationWindow {
       const file = Gio.File.new_for_path(filePath);
       const fileName = file.get_basename() || "";
       
-      // Determine appropriate icon for SRT files
-      const iconName = fileName.toLowerCase().endsWith('.srt') ? 'text-x-generic-symbolic' : 'document-text-symbolic';
+      // Determine appropriate icon for SRT files - use our custom icon
+      const iconName = fileName.toLowerCase().endsWith('.srt') ? 'application-x-srt' : 'document-text-symbolic';
       
       // Truncate filename for display (first 20 chars + extension)
       let displayName = fileName;
@@ -182,7 +182,7 @@ class MainWindow extends Adw.ApplicationWindow {
 
     dropZoneButton.add_controller(dropTarget);
 
-    // Add custom CSS for drop zone styling
+    // Add custom CSS for drop zone styling only
     const cssProvider = new Gtk.CssProvider();
     const cssData = `
       .drop-zone {
@@ -242,15 +242,7 @@ class MainWindow extends Adw.ApplicationWindow {
     targetLangRow.set_model(languageStringList);
     targetLangRow.set_selected(0); // Default to English
 
-    // Update auto-save subtitle when language changes
-    const updateAutoSaveLabel = () => {
-      const selectedIndex = targetLangRow.get_selected();
-      const langCode = popularLanguages[selectedIndex]?.[0] || "en";
-      autoSaveRow.set_subtitle(`Save to same folder (.${langCode}.srt)`);
-    };
-    
-    targetLangRow.connect("notify::selected", updateAutoSaveLabel);
-    updateAutoSaveLabel(); // Set initial label
+
 
     // Connect drop zone button click to file dialog
     dropZoneButton.connect("clicked", showFileDialog);
@@ -322,15 +314,25 @@ class MainWindow extends Adw.ApplicationWindow {
     })();
 
     // Update model info when selection changes
-    const updateModelInfo = () => {
+    const updateModelInfo = async () => {
       const selectedIndex = modelRow.get_selected();
       const selectedModel = allModels[selectedIndex];
       
       if (selectedModel) {
         modelNameRow.set_subtitle(selectedModel.name);
         modelSizeRow.set_subtitle(selectedModel.size || "Unknown");
-        modelParamsRow.set_subtitle(selectedModel.params || "Unknown");
+        modelParamsRow.set_subtitle("Loading...");
         modelInfoGroup.set_visible(true);
+        
+        // Get detailed model info from Ollama API
+        try {
+          const modelInfo = await Translator.getModelInfo(selectedModel.name);
+          modelSizeRow.set_subtitle(modelInfo.size || selectedModel.size || "Unknown");
+          modelParamsRow.set_subtitle(modelInfo.parameter_size || "Unknown");
+        } catch (e) {
+          console.error(`Failed to get model info: ${e}`);
+          modelParamsRow.set_subtitle("Unknown");
+        }
       } else {
         modelInfoGroup.set_visible(false);
       }
@@ -338,87 +340,138 @@ class MainWindow extends Adw.ApplicationWindow {
     
     modelRow.connect("notify::selected", updateModelInfo);
 
+    // State to track translation status
+    let translationOutput: string | null = null;
+    let isTranslated = false;
+    let isTranslating = false;
+    let translationCancellation: Translator.TranslationCancellation | null = null;
+
+    const updateButtonState = () => {
+      if (isTranslating) {
+        translateBtn.set_label("Stop Translation");
+        translateBtn.remove_css_class("suggested-action");
+        translateBtn.remove_css_class("success");
+        translateBtn.add_css_class("destructive-action");
+      } else if (isTranslated && translationOutput) {
+        translateBtn.set_label("Save Translation");
+        translateBtn.remove_css_class("suggested-action");
+        translateBtn.remove_css_class("destructive-action");
+        translateBtn.add_css_class("success");
+      } else {
+        translateBtn.set_label("Start Translation");
+        translateBtn.remove_css_class("success");
+        translateBtn.remove_css_class("destructive-action");
+        translateBtn.add_css_class("suggested-action");
+      }
+    };
+
     translateBtn.connect("clicked", async () => {
       if (!selectedFile) return;
       
-      const selectedLangIndex = targetLangRow.get_selected();
-      const targetLang = popularLanguages[selectedLangIndex]?.[1] || "English";
-      const langCode = popularLanguages[selectedLangIndex]?.[0] || "en";
+      if (isTranslating) {
+        // Stop mode - cancel translation
+        if (translationCancellation) {
+          translationCancellation.cancel();
+          statusLabel.set_label("Stopping translation...");
+        }
+        return;
+      }
       
-      const selectedModelIndex = modelRow.get_selected();
-      const model = allModels[selectedModelIndex]?.name || Translator.recommendedModels[0]?.name || "llama3.2:latest";
-
-      progressBar.set_visible(true);
-      statusLabel.set_label("Translating...");
-
-      try {
-        const out = await Translator.translateSrtFile(selectedFile, targetLang, model, (done, total) => {
-          progressBar.set_fraction(done / total);
-          statusLabel.set_label(`${done}/${total}`);
-        });
-
-        if (autoSaveRow.get_active()) {
-          // Auto-save with language code
-          const inputFile = Gio.File.new_for_path(selectedFile);
-          const inputDir = inputFile.get_parent();
-          const inputBasename = inputFile.get_basename() || "";
-          
-          // Insert language code before extension
-          const lastDot = inputBasename.lastIndexOf('.');
-          let outputName = inputBasename;
-          if (lastDot > 0) {
-            const baseName = inputBasename.substring(0, lastDot);
-            const extension = inputBasename.substring(lastDot);
-            outputName = `${baseName}.${langCode}${extension}`;
-          } else {
-            outputName = `${inputBasename}.${langCode}`;
-          }
-          
-          const outputFile = inputDir?.get_child(outputName);
-          if (outputFile) {
-            try {
-              const outputData = new TextEncoder().encode(out);
-              outputFile.replace_contents(outputData, null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null);
-              statusLabel.set_label(`Translation saved as ${outputName}`);
-            } catch (e) {
-              statusLabel.set_label(`Error saving file: ${e}`);
-            }
-          }
+      if (isTranslated && translationOutput) {
+        // Save mode - show save dialog
+        const selectedLangIndex = targetLangRow.get_selected();
+        const langCode = popularLanguages[selectedLangIndex]?.[0] || "en";
+        const inputFile = Gio.File.new_for_path(selectedFile);
+        const inputBasename = inputFile.get_basename() || "";
+        
+        // Generate suggested filename
+        const lastDot = inputBasename.lastIndexOf('.');
+        let suggestedName = inputBasename;
+        if (lastDot > 0) {
+          const baseName = inputBasename.substring(0, lastDot);
+          const extension = inputBasename.substring(lastDot);
+          suggestedName = `${baseName}.${langCode}${extension}`;
         } else {
-          // Show save dialog
-          const saveDialog = new Gtk.FileChooserNative({
-            transient_for: this,
-            action: Gtk.FileChooserAction.SAVE,
-            accept_label: "Save",
-            cancel_label: "Cancel",
-          });
-          saveDialog.set_current_name(`translated.${langCode}.srt`);
-          
-          saveDialog.connect("response", (dialog: Gtk.FileChooserNative, response_id: number) => {
-            if (response_id === Gtk.ResponseType.ACCEPT) {
-              const f = dialog.get_file();
-              if (f) {
-                try {
-                  const outputData = new TextEncoder().encode(out);
-                  f.replace_contents(outputData, null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null);
-                  statusLabel.set_label("Translation saved successfully!");
-                } catch (e) {
-                  statusLabel.set_label(`Error saving file: ${e}`);
-                }
-              }
-            }
-            dialog.destroy();
-            progressBar.set_visible(false);
-          });
-          
-          saveDialog.show();
-          return; // Don't hide progress bar yet
+          suggestedName = `${inputBasename}.${langCode}`;
         }
         
-        progressBar.set_visible(false);
-      } catch (e) {
-        statusLabel.set_label(`Error: ${e}`);
-        progressBar.set_visible(false);
+        const saveDialog = new Gtk.FileChooserNative({
+          transient_for: this,
+          action: Gtk.FileChooserAction.SAVE,
+          accept_label: "Save",
+          cancel_label: "Cancel",
+        });
+        saveDialog.set_current_name(suggestedName);
+        
+        saveDialog.connect("response", (dialog: Gtk.FileChooserNative, response_id: number) => {
+          if (response_id === Gtk.ResponseType.ACCEPT) {
+            const file = dialog.get_file();
+            if (file && translationOutput) {
+              try {
+                const outputData = new TextEncoder().encode(translationOutput);
+                file.replace_contents(outputData, null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null);
+                statusLabel.set_label(`Translation saved as ${file.get_basename()}`);
+                
+                // Reset state for new translation
+                translationOutput = null;
+                isTranslated = false;
+                isTranslating = false;
+                translationCancellation = null;
+                updateButtonState();
+              } catch (e) {
+                statusLabel.set_label(`Error saving file: ${e}`);
+              }
+            }
+          }
+          dialog.destroy();
+        });
+        
+        saveDialog.show();
+      } else {
+        // Translate mode - start translation
+        const selectedLangIndex = targetLangRow.get_selected();
+        const targetLang = popularLanguages[selectedLangIndex]?.[1] || "English";
+        const langCode = popularLanguages[selectedLangIndex]?.[0] || "en";
+        
+        const selectedModelIndex = modelRow.get_selected();
+        const model = allModels[selectedModelIndex]?.name || Translator.recommendedModels[0]?.name || "llama3.2:latest";
+
+        // Start translation
+        isTranslating = true;
+        translationCancellation = new Translator.TranslationCancellation();
+        updateButtonState();
+
+        progressBar.set_visible(true);
+        statusLabel.set_label("Translating...");
+
+        try {
+          const output = await Translator.translateSrtFile(selectedFile, targetLang, model, (done, total) => {
+            progressBar.set_fraction(done / total);
+            statusLabel.set_label(`Translating ${done}/${total} subtitles...`);
+          }, translationCancellation);
+
+          // Translation complete - update state
+          translationOutput = output;
+          isTranslated = true;
+          isTranslating = false;
+          translationCancellation = null;
+          updateButtonState();
+          
+          progressBar.set_visible(false);
+          statusLabel.set_label("Translation complete! Click 'Save Translation' to save your file.");
+        } catch (e) {
+          // Handle cancellation or error
+          isTranslating = false;
+          translationCancellation = null;
+          updateButtonState();
+          
+          if (e instanceof Error && e.message.includes("cancelled")) {
+            statusLabel.set_label("Translation was stopped.");
+          } else {
+            statusLabel.set_label(`Translation error: ${e}`);
+          }
+          progressBar.set_visible(false);
+        }
       }
     });
   }
