@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="@id@" path="@path@" gettext-domain="@gettext_domain@">
+    <key name="maximized" type="b">
+      <default>false</default>
+      <summary>Window maximized state</summary>
+    </key>
+
+    <key name="window-height" type="i">
+      <default>400</default>
+      <summary>Window height</summary>
+    </key>
+
+    <key name="window-width" type="i">
+      <default>600</default>
+      <summary>Window width</summary>
+    </key>
+  </schema>
+</schemalist>

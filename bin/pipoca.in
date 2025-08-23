@@ -19,8 +19,7 @@ Config.VERSION = "@version@";
 
 bindtextdomain(Config.GETTEXT_PACKAGE, Config.LOCALEDIR);
 textdomain(Config.GETTEXT_PACKAGE);
-// FIXME: Choose a log domain that fits your app
-setConsoleLogDomain("GnomeTsTemplate");
+setConsoleLogDomain("Pipoca");
 
 Gio.resources_register(
   Gio.Resource.load(

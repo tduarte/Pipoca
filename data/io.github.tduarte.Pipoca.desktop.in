@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type = Application
+Name = GNOME TypeScript Template
+Icon = @icon@
+TryExec = @try_exec@
+Exec = @exec@
+Terminal = false
+Categories = GNOME;
+StartupNotify = true
+SingleMainWindow = true
+DBusActivatable = true

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <template class="ExampleMainWindow" parent="AdwApplicationWindow">
+  <template class="PipocaMainWindow" parent="AdwApplicationWindow">
     <property name="default-height">400</property>
     <property name="default-width">600</property>
 
@@ -19,12 +19,218 @@
         </child>
 
         <property name="content">
-          <object class="GtkLabel">
-            <property name="label" translatable="yes">Hello, world!</property>
+          <object class="AdwClamp">
+            <property name="maximum-size">600</property>
+            <property name="margin-top">24</property>
+            <property name="margin-bottom">24</property>
+            <property name="margin-start">24</property>
+            <property name="margin-end">24</property>
+            
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">24</property>
+                
+                <!-- File Selection Card -->
+                <child>
+                  <object class="AdwPreferencesGroup">
+                    <property name="title" translatable="yes">Source File</property>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">12</property>
+                        <property name="margin-top">12</property>
+                        <property name="margin-bottom">12</property>
+                        <property name="margin-start">12</property>
+                        <property name="margin-end">12</property>
+                        
+                        <!-- Drop Zone -->
+                        <child>
+                          <object class="GtkButton" id="drop-zone-button">
+                            <property name="height-request">120</property>
+                            <property name="hexpand">true</property>
+                            <style>
+                              <class name="card" />
+                              <class name="drop-zone" />
+                            </style>
+                            
+                            <child>
+                              <object class="GtkBox" id="drop-zone-content">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">8</property>
+                                <property name="halign">center</property>
+                                <property name="valign">center</property>
+                                
+                                <child>
+                                  <object class="GtkImage" id="drop-zone-icon">
+                                    <property name="icon-name">folder-download-symbolic</property>
+                                    <property name="pixel-size">48</property>
+                                    <style>
+                                      <class name="dim-label" />
+                                    </style>
+                                  </object>
+                                </child>
+                                
+                                <child>
+                                  <object class="GtkLabel" id="drop-zone-label">
+                                    <property name="label" translatable="yes">Drop .srt file here or click to select</property>
+                                    <property name="wrap">true</property>
+                                    <property name="justify">center</property>
+                                    <style>
+                                      <class name="dim-label" />
+                                    </style>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        
+                        <!-- Selected File Display -->
+                        <child>
+                          <object class="GtkBox" id="selected-file-display">
+                            <property name="orientation">vertical</property>
+                            <property name="spacing">8</property>
+                            <property name="halign">center</property>
+                            <property name="visible">false</property>
+                            
+                            <child>
+                              <object class="GtkImage" id="file-type-icon">
+                                <property name="icon-name">text-x-generic-symbolic</property>
+                                <property name="pixel-size">64</property>
+                              </object>
+                            </child>
+                            
+                            <child>
+                              <object class="GtkLabel" id="file-name-label">
+                                <property name="label" translatable="yes">filename.srt</property>
+                                <property name="wrap">true</property>
+                                <property name="justify">center</property>
+                                <style>
+                                  <class name="title-2" />
+                                </style>
+                              </object>
+                            </child>
+                            
+                            <child>
+                              <object class="GtkButton" id="change-file-button">
+                                <property name="label" translatable="yes">Change File</property>
+                                <property name="halign">center</property>
+                                <style>
+                                  <class name="pill" />
+                                </style>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
 
-            <style>
-              <class name="title-1" />
-            </style>
+                <!-- Translation Settings Card -->
+                <child>
+                  <object class="AdwPreferencesGroup">
+                    <property name="title" translatable="yes">Translation Settings</property>
+                    <child>
+                      <object class="AdwComboRow" id="target-language-row">
+                        <property name="title" translatable="yes">Target Language</property>
+                        <property name="subtitle" translatable="yes">Language to translate subtitles to</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwComboRow" id="model-row">
+                        <property name="title" translatable="yes">AI Model</property>
+                        <property name="subtitle" translatable="yes">Choose the model for translation</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwSwitchRow" id="auto-save-row">
+                        <property name="title" translatable="yes">Auto Save</property>
+                        <property name="subtitle" translatable="yes">Save to same folder (.en.srt)</property>
+                        <property name="active">true</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+
+                <!-- Model Information Card -->
+                <child>
+                  <object class="AdwPreferencesGroup" id="model-info-group">
+                    <property name="title" translatable="yes">Model Information</property>
+                    <property name="visible">false</property>
+                    <child>
+                      <object class="AdwActionRow" id="model-name-row">
+                        <property name="title" translatable="yes">Model Name</property>
+                        <child type="prefix">
+                          <object class="GtkImage">
+                            <property name="icon-name">computer-symbolic</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwActionRow" id="model-size-row">
+                        <property name="title" translatable="yes">Model Size</property>
+                        <child type="prefix">
+                          <object class="GtkImage">
+                            <property name="icon-name">drive-harddisk-symbolic</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwActionRow" id="model-params-row">
+                        <property name="title" translatable="yes">Parameters</property>
+                        <child type="prefix">
+                          <object class="GtkImage">
+                            <property name="icon-name">preferences-other-symbolic</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+
+                <!-- Action Button -->
+                <child>
+                  <object class="GtkButton" id="translate-button">
+                    <property name="label" translatable="yes">Start Translation</property>
+                    <property name="sensitive">false</property>
+                    <property name="halign">center</property>
+                    <style>
+                      <class name="pill" />
+                      <class name="suggested-action" />
+                    </style>
+                  </object>
+                </child>
+
+                <!-- Progress and Status -->
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">12</property>
+                    <child>
+                      <object class="GtkProgressBar" id="progress-bar">
+                        <property name="visible">false</property>
+                        <style>
+                          <class name="osd" />
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="status-label">
+                        <property name="label" translatable="yes"></property>
+                        <property name="halign">center</property>
+                        <style>
+                          <class name="dim-label" />
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
           </object>
         </property>
       </object>
@@ -38,7 +244,7 @@
     </item>
 
     <item>
-      <attribute name="label" translatable="yes">_About GNOME TypeScript Template</attribute>
+      <attribute name="label" translatable="yes">_About Pipoca</attribute>
       <attribute name="action">win.show-about-dialog</attribute>
     </item>
   </menu>

@@ -1,6 +1,6 @@
 {
-  "id": "ar.liber.nyx.GnomeTsTemplate",
-  "command": "gnome-ts-template",
+  "id": "io.github.tduarte.Pipoca",
+  "command": "pipoca",
   "runtime": "org.gnome.Platform",
   "runtime-version": "48",
   "sdk": "org.gnome.Sdk",
@@ -13,11 +13,12 @@
     "--share=ipc",
     "--socket=wayland",
     "--socket=fallback-x11",
-    "--device=dri"
+    "--device=dri",
+    "--share=network"
   ],
   "modules": [
     {
-      "name": "gnome-ts-template",
+      "name": "pipoca",
       "buildsystem": "meson",
       "build-options": {
         "build-args": ["--share=network"]

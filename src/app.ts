@@ -4,8 +4,7 @@ import GObject from "gi://GObject";
 
 import MainWindow from "./main-window.js";
 
-// FIXME: Choose a namespace that fits your app
-const options = {GTypeName: "ExampleApp"};
+const options = {GTypeName: "PipocaApp"};
 
 class App extends Adw.Application {
   static {
@@ -23,9 +22,8 @@ class App extends Adw.Application {
   public override vfunc_startup(): void {
     super.vfunc_startup();
 
-    // FIXME: Update this with your app name
-    GLib.set_application_name("GNOME TypeScript Template");
-    GLib.set_prgname("gnome-ts-template");
+    GLib.set_application_name("Pipoca");
+    GLib.set_prgname("pipoca");
 
     this.add_action_entries([{activate: this.quit.bind(this), name: "quit"}]);
     this.set_accels_for_action("app.quit", ["<Ctrl>Q"]);

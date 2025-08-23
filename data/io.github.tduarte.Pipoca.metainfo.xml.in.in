@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- © 2025 [nyx] (https://nyx.liber.ar/) -->
+<component type="desktop-application">
+  <id>@id@</id>
+
+  <!-- License: https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#license -->
+  <metadata_license>CC0</metadata_license>
+  <project_license>BlueOak-1.0.0</project_license>
+
+  <!--
+    Name and summary:
+    https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#name-and-summary
+  -->
+  <name>GNOME TypeScript Template</name>
+  <summary>Write a GNOME application using TypeScript</summary>
+
+  <!--
+    Developer name:
+    https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#developer-name
+  -->
+  <developer id="ar.liber.nyx">
+    <name translatable="no">[nyx]</name>
+  </developer>
+
+  <!-- Description: https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#description -->
+  <description>
+    <p>
+      A boilerplate template for GNOME + TypeScript. It uses Meson as a build
+      system and has Flatpak support by default.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">@launchable@</launchable>
+
+  <!--
+    Categories and keywords:
+    https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#categories-and-keywords
+  -->
+  <categories />
+  <keywords />
+
+  <!-- Brand color: https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#brand-color -->
+  <branding>
+    <color type="primary" scheme_preference="light">#ff00ff</color>
+    <color type="primary" scheme_preference="dark">#993d3d</color>
+  </branding>
+
+  <!-- Open Age Rating Service: https://hughsie.github.io/oars/generate.html -->
+  <content_rating type="oars-1.1" />
+
+  <!-- URL: https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#url -->
+  <url type="bugtracker">https://codeberg.org/nyx_lyb3ra/gnome-ts-template/issues</url>
+  <url type="homepage">https://codeberg.org/nyx_lyb3ra/gnome-ts-template</url>
+  <url type="vcs-browser">https://codeberg.org/nyx_lyb3ra/gnome-ts-template</url>
+
+  <!-- Screenshots: https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#screenshots -->
+  <screenshots>
+    <screenshot type="default">
+      <image>
+        https://codeberg.org/nyx_lyb3ra/gnome-ts-template/raw/main/data/screenshots/screenshot1.png
+      </image>
+
+      <caption>Main window</caption>
+    </screenshot>
+
+    <screenshot>
+      <image>
+        https://codeberg.org/nyx_lyb3ra/gnome-ts-template/raw/main/data/screenshots/screenshot2.png
+      </image>
+
+      <caption>About dialog</caption>
+    </screenshot>
+  </screenshots>
+
+  <!-- Release: https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#release -->
+  <releases>
+    <release version="1.0-alpha" date="2025-06-02">
+      <description>
+        <p>Release description</p>
+        <ul>
+          <li>List of changes</li>
+          <li>List of changes</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+
+  <translation type="gettext">@translation_id@</translation>
+
+  <!--
+    Device support:
+    https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#device-support
+  -->
+  <recommends>
+    <control>keyboard</control>
+    <control>pointing</control>
+    <control>touch</control>
+  </recommends>
+
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
+
+</component>

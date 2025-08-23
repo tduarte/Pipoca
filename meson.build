@@ -1,6 +1,5 @@
 project(
-  'gnome-ts-template',
-  # FIXME: Choose a license that fits your project
+  'pipoca',
   license: 'BlueOak-1.0.0',
   license_files: 'LICENSE.md',
   meson_version: '>=1.1',
@@ -11,8 +10,7 @@ fs = import('fs')
 gnome = import('gnome')
 i18n = import('i18n')
 
-# FIXME: Choose an app id: https://docs.flathub.org/docs/for-app-authors/requirements#application-id
-app_id = 'ar.liber.nyx.GnomeTsTemplate'
+app_id = 'io.github.tduarte.Pipoca'
 gettext_package = meson.project_name()
 version = meson.project_version()
 vcs_tag = 'unknown'
@@ -46,11 +44,11 @@ configure_file(
     'pkgdatadir': pkgdatadir,
     'version': f'@version@+@vcs_tag@',
   },
-  input: 'bin/' + meson.project_name() + '.in',
+  input: 'bin/pipoca.in',
   install: true,
   install_dir: bindir,
   install_mode: 'rwxr--r--',
-  output: meson.project_name(),
+  output: 'pipoca',
 )
 
 node = find_program('node')
