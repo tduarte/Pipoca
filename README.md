@@ -8,15 +8,13 @@
 
 [![Built with GTK4](https://img.shields.io/badge/Built%20with-GTK4-blue.svg)](https://gtk.org/)
 [![Powered by Libadwaita](https://img.shields.io/badge/Powered%20by-Libadwaita-green.svg)](https://gnome.pages.gitlab.gnome.org/libadwaita/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Flatpak](https://img.shields.io/badge/Flatpak-4A90E2?logo=flathub&logoColor=white)](https://flatpak.org/)
 
 </div>
 
 ## ✨ Features
 
 - 🎯 **Drag & Drop Interface** - Simply drag your `.srt` files into the beautiful drop zone
-- 🤖 **Local AI Translation** - Uses your locally installed Ollama models for privacy and speed
+- 🤖 **Local AI Translation** - Uses your locally installed Ollama models for privacy and cost
 - 🌍 **20+ Languages** - Supports the world's most popular languages with automatic file naming
 - 💾 **Smart Auto-Save** - Automatically saves translated files with language codes (e.g., `movie.en.srt`)
 - 📊 **Model Information** - View detailed information about your selected AI model
@@ -26,10 +24,6 @@
 ## 🖼️ Screenshots
 
 ![Main Interface](data/screenshots/screenshot1.png)
-*Modern drag-and-drop interface with model selection*
-
-![Translation in Progress](data/screenshots/screenshot2.png)
-*Real-time translation progress with model information*
 
 ## 🚀 Installation
 
@@ -260,29 +254,19 @@ PIPOCA_DEBUG=1 flatpak run io.github.tduarte.Pipoca
 
 ## 📝 License
 
-This project is licensed under the [MIT License](LICENSE.md).
+This project is licensed under the [Blue Oak Model License](LICENSE.md).
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **GNOME Team** for the amazing GTK4 and Libadwaita frameworks
 - **Ollama Team** for the incredible local AI model platform
-- **TypeScript Team** for excellent language tooling
+- **nyx_lyb3ra** for the [GNOME TypeScript Template](https://codeberg.org/nyx_lyb3ra/gnome-ts-template)
 - **Flatpak Team** for modern application distribution
-
-## 🌟 Support
-
-If you find Pipoca useful, please:
-- ⭐ Star this repository
-- 🐛 Report issues and suggest features
-- 💝 Contribute code or translations
-- 📢 Share with friends who work with subtitles
 
 ---
 
 <div align="center">
 
-**Made with ❤️ by [Tiago Duarte](https://github.com/tduarte)**
-
-*Bringing AI-powered subtitle translation to everyone, privately and locally.*
+**Made with ❤️ by [Thiago Duarte](https://github.com/tduarte)**
 
 </div>
