@@ -1,161 +1,288 @@
-# GNOME TypeScript Template
+# 🍿 Pipoca - AI-Powered Subtitle Translator
 
-A template for creating GNOME applications using GTK, libadwaita, TypeScript,
-Flatpak, and Meson. Just clone this repo and start building your application!
+<div align="center">
 
-![A screenshot showing the main window of this template](./data/screenshots/screenshot1.png)
+![Pipoca Logo](data/icons/io.github.tduarte.Pipoca.svg)
 
-## Building
+**A beautiful, modern GNOME application for translating subtitle files using local AI models**
 
-Building this template is pretty easy, and here are the different ways to do it,
-from easiest to hardest.
+[![Built with GTK4](https://img.shields.io/badge/Built%20with-GTK4-blue.svg)](https://gtk.org/)
+[![Powered by Libadwaita](https://img.shields.io/badge/Powered%20by-Libadwaita-green.svg)](https://gnome.pages.gitlab.gnome.org/libadwaita/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Flatpak](https://img.shields.io/badge/Flatpak-4A90E2?logo=flathub&logoColor=white)](https://flatpak.org/)
 
-### GNOME Builder
+</div>
 
-This is the easiest method. Builder is the GNOME IDE and has a plethora of tools
-to make your app the best it can be.
+## ✨ Features
 
-1. Make sure you install Builder from Flathub:
-   https://flathub.org/apps/org.gnome.Builder
-2. Open Builder and click the “Clone repository...” button.
-3. Enter the URL of the template, the location where you want it to be cloned,
-   your name, and your email address, and click the “Clone repository” button.
-4. Once cloned, Builder will alert you if there are any missing dependencies. Be
-   sure to follow its instructions to install them.
-5. Click the “Run Project” button (the one with the ▶️ icon) and voilà! The
-   application will build and run immediately.
+- 🎯 **Drag & Drop Interface** - Simply drag your `.srt` files into the beautiful drop zone
+- 🤖 **Local AI Translation** - Uses your locally installed Ollama models for privacy and speed
+- 🌍 **20+ Languages** - Supports the world's most popular languages with automatic file naming
+- 💾 **Smart Auto-Save** - Automatically saves translated files with language codes (e.g., `movie.en.srt`)
+- 📊 **Model Information** - View detailed information about your selected AI model
+- 🎨 **Modern UI** - Beautiful Libadwaita interface that follows GNOME design guidelines
+- ⚡ **Real-time Progress** - Live translation progress with visual feedback
 
-### Visual Studio Code / VSCodium
+## 🖼️ Screenshots
 
-This method is for those who are very accustomed to using Microsoft's code
-editor. We will use Bilal's Flatpak extension.
+![Main Interface](data/screenshots/screenshot1.png)
+*Modern drag-and-drop interface with model selection*
 
-1. Make sure you install Bilal's Flatpak extension.
+![Translation in Progress](data/screenshots/screenshot2.png)
+*Real-time translation progress with model information*
 
-   - Visual Studio Marketplace:
-     https://marketplace.visualstudio.com/items?itemName=bilelmoussaoui.flatpak-vscode
-   - Open VSX Registry:
-     https://open-vsx.org/extension/bilelmoussaoui/flatpak-vscode
+## 🚀 Installation
 
-2. Click on “Clone Git Repository...”
-3. Enter the template URL and press Enter
-4. You will be asked to select the location where you want to clone the
-   template. Select one and continue.
-5. Once cloned, check the status bar to make sure the extension does not request
-   any additional dependencies. If you need any, install them with
-   `flatpak install --user`
-6. Once everything is ready, press <kbd>Ctrl</kbd> + <kbd>Alt</kbd> +
-   <kbd>B</kbd> or select “Flatpak: Build” from the command palette. Voilà!
+### Prerequisites
 
-### Flatpak Builder
-
-If you want to do everything manually but still want Flatpak to manage the
-builds, then this is the method for you.
-
-1. Install Flatpak, Git, and Git LFS using the appropriate methods for your
-   distribution:
-
-   ```sh
-   # For Ubuntu (or any Debian-based distro)
-   sudo apt install flatpak git git-lfs
-
-   # For Fedora (or any distro from the Red Hat family)
-   sudo dnf install flatpak git git-lfs
+1. **Install Flatpak** (if not already installed):
+   ```bash
+   # Ubuntu/Debian
+   sudo apt install flatpak
+   
+   # Fedora
+   sudo dnf install flatpak
+   
+   # Arch Linux
+   sudo pacman -S flatpak
    ```
 
-2. Install Flatpak Builder, the GNOME SDK, the GNOME runtime, and the Node.js
-   SDK extension:
-
-   ```sh
-   flatpak install --user                        \
-   	org.flatpak.Builder//stable                 \
-   	org.gnome.Sdk//48                           \
-   	org.gnome.Platform//48                      \
-   	org.freedesktop.Sdk.Extension.node24//24.08
+2. **Install Ollama** for AI translation:
+   ```bash
+   curl -fsSL https://ollama.ai/install.sh | sh
    ```
 
-3. Clone the template using Git:
-
-   ```sh
-   git clone https://codeberg.org/nyx_lyb3ra/gnome-ts-template.git
+3. **Download AI models** (recommended):
+   ```bash
+   # Lightweight, fast models
+   ollama pull llama3.2:3b    # 2GB - Great for quick translations
+   ollama pull gemma2:2b      # 1.6GB - Efficient and accurate
+   
+   # More powerful models (optional)
+   ollama pull llama3.2:8b    # 4.7GB - Higher quality translations
    ```
 
-4. Once the template has been cloned, run the following command within its
-   directory:
+### Installing Pipoca
 
-   ```sh
-   flatpak run org.flatpak.Builder     \
-   	--force-clean                     \
-   	--install                         \
-   	--user                            \
-   	repo                              \
-   	ar.liber.nyx.GnomeTsTemplate.json
+#### Option 1: Build from Source (Recommended for Contributors)
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/tduarte/pipoca.git
+   cd pipoca
    ```
 
-5. Voilà! The template will be built and installed at the user level on your
-   system.
-
-### Meson Build System
-
-Meson is the build system used by most apps in GNOME. If you want to build the
-template using your distribution's dependencies, then this is the method for
-you.
-
-1. Install `desktop-file-utils`, `gettext`, Git, Git LFS, GJS, GLib, GTK,
-   `libadwaita`, Meson, and Node.js using the appropriate methods for your
-   distribution.
-
-   ```sh
-   # For Ubuntu (or any Debian-based distro)
-   sudo apt install     \
-   	desktop-file-utils \
-   	gettext            \
-   	git                \
-   	git-lfs            \
-   	gjs                \
-   	libglib2.0-dev     \
-   	libgtk-4-dev       \
-   	libadwaita-1-dev   \
-   	meson              \
-   	nodejs             \
-   	npm
-
-   # For Fedora (or any distro from the Red Hat family)
-   sudo dnf install     \
-   	desktop-file-utils \
-   	gettext            \
-   	git                \
-   	git-lfs            \
-   	gjs                \
-   	glib2-devel        \
-   	gtk4-devel         \
-   	libadwaita-devel   \
-   	meson              \
-   	nodejs
+2. **Install Flatpak Builder**:
+   ```bash
+   flatpak install flathub org.flatpak.Builder
    ```
 
-2. Set up the build folder:
-
-   ```sh
-   meson setup _build -Dprefix=~/.local
+3. **Build and install**:
+   ```bash
+   flatpak run org.flatpak.Builder --force-clean --install --user repo io.github.tduarte.Pipoca.json
    ```
 
-3. Build and install the app:
-
-   ```sh
-   meson install -C _build
+4. **Run Pipoca**:
+   ```bash
+   flatpak run io.github.tduarte.Pipoca
    ```
 
-4. Voilà! The template will be built and installed at the user level on your
-   system.
+#### Option 2: Install from Flathub (Coming Soon)
 
-## Credits
+```bash
+flatpak install flathub io.github.tduarte.Pipoca
+```
 
-I created this template, drawing heavily on the one Bilal made for Rust.
-[Check it out!](https://gitlab.gnome.org/World/Rust/gtk-rust-template)
+## 🎮 Usage
 
-## License
+1. **Start Ollama** (if not running):
+   ```bash
+   ollama serve
+   ```
 
-[GNOME TypeScript Template](https://codeberg.org/nyx_lyb3ra/gnome-ts-template)
-© 2025 by [[nyx]](https://nyx.liber.ar/) is licensed under
-[Blue Oak Model License 1.0.0](./LICENSE.md).
+2. **Launch Pipoca**:
+   ```bash
+   flatpak run io.github.tduarte.Pipoca
+   ```
+
+3. **Translate subtitles**:
+   - Drag your `.srt` file into the drop zone OR click to select
+   - Choose your target language from 20+ options
+   - Select an AI model (installed models + recommended options)
+   - Toggle auto-save to automatically name files with language codes
+   - Click "Start Translation" and watch the magic happen! ✨
+
+## 🛠️ Development
+
+### Tech Stack
+
+- **Language**: TypeScript
+- **UI Framework**: GTK4 + Libadwaita
+- **Runtime**: GJS (GNOME JavaScript)
+- **Build System**: Meson + Flatpak
+- **AI Backend**: Ollama HTTP API
+- **Bundler**: ESBuild
+
+### Development Setup
+
+1. **Install development dependencies**:
+   ```bash
+   # Fedora
+   sudo dnf install flatpak-builder nodejs npm typescript
+   
+   # Ubuntu/Debian  
+   sudo apt install flatpak-builder nodejs npm
+   sudo npm install -g typescript
+   
+   # Arch Linux
+   sudo pacman -S flatpak-builder nodejs npm typescript
+   ```
+
+2. **Clone and setup**:
+   ```bash
+   git clone https://github.com/tduarte/pipoca.git
+   cd pipoca
+   npm install
+   ```
+
+3. **Development build**:
+   ```bash
+   # Quick development build
+   npm run build
+   
+   # Full Flatpak build and install
+   flatpak run org.flatpak.Builder --force-clean --install --user repo io.github.tduarte.Pipoca.json
+   ```
+
+4. **Run for testing**:
+   ```bash
+   flatpak run io.github.tduarte.Pipoca
+   ```
+
+### Project Structure
+
+```
+pipoca/
+├── src/                          # TypeScript source code
+│   ├── app.ts                    # Application entry point
+│   ├── main-window.ts            # Main window logic & UI handling
+│   ├── main-window.ui            # GTK UI definition
+│   └── translator.ts             # SRT parsing & Ollama integration
+├── data/                         # Application data files
+│   ├── icons/                    # App icons
+│   ├── screenshots/              # Screenshots for README
+│   └── *.desktop.in              # Desktop entry
+├── scripts/                      # Build scripts
+│   └── esbuild.js               # ESBuild configuration
+├── io.github.tduarte.Pipoca.json # Flatpak manifest
+└── meson.build                   # Build configuration
+```
+
+### Key Components
+
+- **Drag & Drop**: GTK4 `DropTarget` with custom CSS styling
+- **File Handling**: GIO File APIs for cross-platform file operations
+- **HTTP Client**: libsoup for Ollama API communication
+- **UI Components**: Libadwaita widgets (`AdwPreferencesGroup`, `AdwComboRow`, etc.)
+- **Async Operations**: GJS async/await patterns with proper error handling
+
+## 🤝 Contributing
+
+We welcome contributions! Here's how you can help:
+
+### Reporting Issues
+
+1. Check if the issue already exists in [GitHub Issues](https://github.com/tduarte/pipoca/issues)
+2. Provide detailed information:
+   - Pipoca version
+   - Operating system
+   - Ollama version and installed models
+   - Steps to reproduce
+   - Expected vs actual behavior
+
+### Code Contributions
+
+1. **Fork the repository**
+2. **Create a feature branch**:
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+3. **Make your changes** following our coding standards:
+   - Use TypeScript for type safety
+   - Follow existing code formatting
+   - Add comments for complex logic
+   - Test your changes thoroughly
+
+4. **Build and test**:
+   ```bash
+   flatpak run org.flatpak.Builder --force-clean --install --user repo io.github.tduarte.Pipoca.json
+   flatpak run io.github.tduarte.Pipoca
+   ```
+
+5. **Submit a Pull Request** with:
+   - Clear description of changes
+   - Screenshots if UI changes
+   - Testing instructions
+
+### Translation Contributions
+
+Help translate Pipoca into more languages! We use standard gettext (`.po`) files.
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**Pipoca won't start:**
+- Ensure Flatpak is properly installed
+- Check if all dependencies are available: `flatpak list`
+
+**Models not loading:**
+- Verify Ollama is running: `ollama ps`
+- Check Ollama API: `curl http://localhost:11434/api/tags`
+- Ensure network permissions are enabled in Flatpak
+
+**Translation fails:**
+- Verify the selected model is downloaded: `ollama list`
+- Check Ollama logs for errors
+- Ensure the SRT file is properly formatted
+
+**Performance issues:**
+- Try smaller models (gemma2:2b, llama3.2:3b)
+- Close other applications to free up RAM
+- Consider using GPU acceleration if available
+
+### Debug Mode
+
+Run with debug output:
+```bash
+PIPOCA_DEBUG=1 flatpak run io.github.tduarte.Pipoca
+```
+
+## 📝 License
+
+This project is licensed under the [MIT License](LICENSE.md).
+
+## 🙏 Acknowledgments
+
+- **GNOME Team** for the amazing GTK4 and Libadwaita frameworks
+- **Ollama Team** for the incredible local AI model platform
+- **TypeScript Team** for excellent language tooling
+- **Flatpak Team** for modern application distribution
+
+## 🌟 Support
+
+If you find Pipoca useful, please:
+- ⭐ Star this repository
+- 🐛 Report issues and suggest features
+- 💝 Contribute code or translations
+- 📢 Share with friends who work with subtitles
+
+---
+
+<div align="center">
+
+**Made with ❤️ by [Tiago Duarte](https://github.com/tduarte)**
+
+*Bringing AI-powered subtitle translation to everyone, privately and locally.*
+
+</div>
