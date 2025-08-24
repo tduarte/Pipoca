@@ -15,13 +15,13 @@
 
 ## ✨ Features
 
-- 🎯 **Drag & Drop Interface** - Simply drag your `.srt` files into the beautiful drop zone
-- 🤖 **Local AI Translation** - Uses your locally installed Ollama models for privacy and cost
-- 🌍 **20+ Languages** - Supports the world's most popular languages with automatic file naming
-- 💾 **Smart Auto-Save** - Automatically saves translated files with language codes (e.g., `movie.en.srt`)
-- 📊 **Model Information** - View detailed information about your selected AI model
-- 🎨 **Modern UI** - Beautiful Libadwaita interface that follows GNOME design guidelines
-- ⚡ **Real-time Progress** - Live translation progress with visual feedback
+- **Drag & Drop Interface** - Simply drag your `.srt` files into the beautiful drop zone
+- **Local AI Translation** - Uses your locally installed Ollama models for privacy and cost
+- **20+ Languages** - Supports the world's most popular languages with automatic file naming
+- **Smart Auto-Save** - Automatically saves translated files with language codes (e.g., `movie.en.srt`)
+- **Model Information** - View detailed information about your selected AI model
+- **Modern UI** - Beautiful Libadwaita interface that follows GNOME design guidelines
+- **Real-time Progress** - Live translation progress with visual feedback
 
 ## 🖼️ Screenshots
 
@@ -31,24 +31,12 @@
 
 ### Prerequisites
 
-1. **Install Flatpak** (if not already installed):
-   ```bash
-   # Ubuntu/Debian
-   sudo apt install flatpak
-   
-   # Fedora
-   sudo dnf install flatpak
-   
-   # Arch Linux
-   sudo pacman -S flatpak
-   ```
-
-2. **Install Ollama** for AI translation:
+1. **Install Ollama** for AI translation:
    ```bash
    curl -fsSL https://ollama.ai/install.sh | sh
    ```
 
-3. **Download AI models** (recommended):
+2. **Download AI models** (recommended):
    ```bash
    # Lightweight, fast models
    ollama pull llama3.2:3b    # 2GB - Great for quick translations
@@ -114,46 +102,10 @@ flatpak install flathub io.github.tduarte.Pipoca
 
 - **Language**: TypeScript
 - **UI Framework**: GTK4 + Libadwaita
-- **Runtime**: GJS (GNOME JavaScript)
 - **Build System**: Meson + Flatpak
 - **AI Backend**: Ollama HTTP API
 - **Bundler**: ESBuild
 
-### Development Setup
-
-1. **Install development dependencies**:
-   ```bash
-   # Fedora
-   sudo dnf install flatpak-builder nodejs npm typescript
-   
-   # Ubuntu/Debian  
-   sudo apt install flatpak-builder nodejs npm
-   sudo npm install -g typescript
-   
-   # Arch Linux
-   sudo pacman -S flatpak-builder nodejs npm typescript
-   ```
-
-2. **Clone and setup**:
-   ```bash
-   git clone https://github.com/tduarte/pipoca.git
-   cd pipoca
-   npm install
-   ```
-
-3. **Development build**:
-   ```bash
-   # Quick development build
-   npm run build
-   
-   # Full Flatpak build and install
-   flatpak run org.flatpak.Builder --force-clean --install --user repo io.github.tduarte.Pipoca.json
-   ```
-
-4. **Run for testing**:
-   ```bash
-   flatpak run io.github.tduarte.Pipoca
-   ```
 
 ### Project Structure
 
@@ -182,7 +134,7 @@ pipoca/
 - **UI Components**: Libadwaita widgets (`AdwPreferencesGroup`, `AdwComboRow`, etc.)
 - **Async Operations**: GJS async/await patterns with proper error handling
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Here's how you can help:
 
@@ -224,7 +176,7 @@ We welcome contributions! Here's how you can help:
 
 Help translate Pipoca into more languages! We use standard gettext (`.po`) files.
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 

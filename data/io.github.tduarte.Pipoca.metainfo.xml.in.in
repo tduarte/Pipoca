@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- © 2025 [nyx] (https://nyx.liber.ar/) -->
+<!-- © 2025 Thiago Duarte (https://github.com/tduarte) -->
 <component type="desktop-application">
   <id>@id@</id>
 
@@ -11,22 +11,45 @@
     Name and summary:
     https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#name-and-summary
   -->
-  <name>GNOME TypeScript Template</name>
-  <summary>Write a GNOME application using TypeScript</summary>
+  <name>Pipoca</name>
+  <summary>AI-powered subtitle translation using local Ollama models</summary>
 
   <!--
     Developer name:
     https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#developer-name
   -->
-  <developer id="ar.liber.nyx">
-    <name translatable="no">[nyx]</name>
+  <developer id="io.github.tduarte">
+    <name translatable="no">Thiago Duarte</name>
   </developer>
 
   <!-- Description: https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#description -->
   <description>
     <p>
-      A boilerplate template for GNOME + TypeScript. It uses Meson as a build
-      system and has Flatpak support by default.
+      Pipoca is a modern, privacy-focused subtitle translation application that leverages local AI models through Ollama. 
+      Translate your subtitle files (.srt) to over 20 languages using powerful language models running entirely on your computer.
+    </p>
+    
+    <p>
+      <strong>⚠️ Required:</strong> Ollama must be installed on your system to use Pipoca. 
+      <a href="https://ollama.com/download">Download Ollama</a> for your operating system if you haven't installed it yet.
+    </p>
+    
+    <p>
+      <strong>Key Features:</strong>
+    </p>
+    <ul>
+      <li><strong>Local AI Processing:</strong> All translations happen on your machine using Ollama models</li>
+      <li><strong>Multi-language Support:</strong> Translate to 20+ popular languages with flag emojis</li>
+      <li><strong>Smart Model Selection:</strong> Built-in recommendations for translation-optimized models</li>
+      <li><strong>Drag &amp; Drop:</strong> Easy file selection with visual feedback</li>
+      <li><strong>Real-time Progress:</strong> Track translation progress with GNOME HIG-compliant progress bars</li>
+      <li><strong>Privacy First:</strong> No data leaves your computer</li>
+      <li><strong>Modern UI:</strong> Beautiful Libadwaita interface following GNOME design principles</li>
+    </ul>
+    
+    <p>
+      <strong>Perfect for:</strong> Content creators, language learners, accessibility improvements, and anyone who needs 
+      to translate subtitle files while maintaining complete privacy and control over their data.
     </p>
   </description>
 
@@ -36,50 +59,78 @@
     Categories and keywords:
     https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#categories-and-keywords
   -->
-  <categories />
-  <keywords />
+  <categories>
+    <category>AudioVideo</category>
+    <category>Utility</category>
+  </categories>
+  
+  <keywords>
+    <keyword>subtitle</keyword>
+    <keyword>translation</keyword>
+    <keyword>ai</keyword>
+    <keyword>ollama</keyword>
+    <keyword>srt</keyword>
+    <keyword>language</keyword>
+    <keyword>local</keyword>
+    <keyword>privacy</keyword>
+    <keyword>gnome</keyword>
+    <keyword>gtk</keyword>
+  </keywords>
 
   <!-- Brand color: https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#brand-color -->
   <branding>
-    <color type="primary" scheme_preference="light">#ff00ff</color>
-    <color type="primary" scheme_preference="dark">#993d3d</color>
+    <color type="primary" scheme_preference="light">#3584e4</color>
+    <color type="primary" scheme_preference="dark">#62a0ea</color>
   </branding>
 
   <!-- Open Age Rating Service: https://hughsie.github.io/oars/generate.html -->
   <content_rating type="oars-1.1" />
 
   <!-- URL: https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#url -->
-  <url type="bugtracker">https://codeberg.org/nyx_lyb3ra/gnome-ts-template/issues</url>
-  <url type="homepage">https://codeberg.org/nyx_lyb3ra/gnome-ts-template</url>
-  <url type="vcs-browser">https://codeberg.org/nyx_lyb3ra/gnome-ts-template</url>
+  <url type="bugtracker">https://github.com/tduarte/Pipoca/issues</url>
+  <url type="homepage">https://github.com/tduarte/Pipoca</url>
+  <url type="vcs-browser">https://github.com/tduarte/Pipoca</url>
 
   <!-- Screenshots: https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#screenshots -->
   <screenshots>
     <screenshot type="default">
       <image>
-        https://codeberg.org/nyx_lyb3ra/gnome-ts-template/raw/main/data/screenshots/screenshot1.png
+        https://github.com/tduarte/Pipoca/raw/main/data/screenshots/screenshot1.png
       </image>
 
-      <caption>Main window</caption>
+      <caption>Main interface with file selection and model information</caption>
     </screenshot>
 
     <screenshot>
       <image>
-        https://codeberg.org/nyx_lyb3ra/gnome-ts-template/raw/main/data/screenshots/screenshot2.png
+        https://github.com/tduarte/Pipoca/raw/main/data/screenshots/screenshot2.png
       </image>
 
-      <caption>About dialog</caption>
+      <caption>Translation in progress with progress bar</caption>
+    </screenshot>
+    
+    <screenshot>
+      <image>
+        https://github.com/tduarte/Pipoca/raw/main/data/screenshots/screenshot3.png
+      </image>
+
+      <caption>Model selection with recommendation indicators</caption>
     </screenshot>
   </screenshots>
 
   <!-- Release: https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#release -->
   <releases>
-    <release version="1.0-alpha" date="2025-06-02">
+    <release version="1.0.0" date="2025-01-23">
       <description>
-        <p>Release description</p>
+        <p>Initial release of Pipoca - AI-powered subtitle translation</p>
         <ul>
-          <li>List of changes</li>
-          <li>List of changes</li>
+          <li>Core subtitle translation functionality using local Ollama models</li>
+          <li>Support for 20+ languages</li>
+          <li>Smart model recommendations for translation tasks</li>
+          <li>Drag &amp; drop file selection with visual feedback</li>
+          <li>Real-time translation progress tracking</li>
+          <li>Modern Libadwaita UI following GNOME design principles</li>
+          <li>Complete privacy - all processing happens locally</li>
         </ul>
       </description>
     </release>

@@ -1,3 +1,0 @@
-[D-BUS Service]
-Name = @name@
-Exec = @exec@ --gapplication-service
