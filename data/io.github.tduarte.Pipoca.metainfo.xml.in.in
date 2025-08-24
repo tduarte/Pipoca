@@ -30,25 +30,25 @@
     </p>
     
     <p>
-      <strong>⚠️ Required:</strong> Ollama must be installed on your system to use Pipoca. 
-      <a href="https://ollama.com/download">Download Ollama</a> for your operating system if you haven't installed it yet.
+      Prerequisites: Ollama must be installed on your system to use Pipoca. 
+      Download Ollama from https://ollama.com/download for your operating system if you haven't installed it yet.
     </p>
     
     <p>
-      <strong>Key Features:</strong>
+      Key Features:
     </p>
     <ul>
-      <li><strong>Local AI Processing:</strong> All translations happen on your machine using Ollama models</li>
-      <li><strong>Multi-language Support:</strong> Translate to 20+ popular languages with flag emojis</li>
-      <li><strong>Smart Model Selection:</strong> Built-in recommendations for translation-optimized models</li>
-      <li><strong>Drag &amp; Drop:</strong> Easy file selection with visual feedback</li>
-      <li><strong>Real-time Progress:</strong> Track translation progress with GNOME HIG-compliant progress bars</li>
-      <li><strong>Privacy First:</strong> No data leaves your computer</li>
-      <li><strong>Modern UI:</strong> Beautiful Libadwaita interface following GNOME design principles</li>
+      <li>Local AI Processing: All translations happen on your machine using Ollama models</li>
+      <li>Multi-language Support: Translate to 20+ popular languages with flag emojis</li>
+      <li>Smart Model Selection: Built-in recommendations for translation-optimized models</li>
+      <li>Drag &amp; Drop: Easy file selection with visual feedback</li>
+      <li>Real-time Progress: Track translation progress with GNOME HIG-compliant progress bars</li>
+      <li>Privacy First: No data leaves your computer</li>
+      <li>Modern UI: Beautiful Libadwaita interface following GNOME design principles</li>
     </ul>
     
     <p>
-      <strong>Perfect for:</strong> Content creators, language learners, accessibility improvements, and anyone who needs 
+      Perfect for: Content creators, language learners, accessibility improvements, and anyone who needs 
       to translate subtitle files while maintaining complete privacy and control over their data.
     </p>
   </description>
@@ -99,22 +99,6 @@
       </image>
 
       <caption>Main interface with file selection and model information</caption>
-    </screenshot>
-
-    <screenshot>
-      <image>
-        https://github.com/tduarte/Pipoca/raw/main/data/screenshots/screenshot2.png
-      </image>
-
-      <caption>Translation in progress with progress bar</caption>
-    </screenshot>
-    
-    <screenshot>
-      <image>
-        https://github.com/tduarte/Pipoca/raw/main/data/screenshots/screenshot3.png
-      </image>
-
-      <caption>Model selection with recommendation indicators</caption>
     </screenshot>
   </screenshots>
 
