@@ -4,6 +4,62 @@ import GLib from "gi://GLib";
 
 type Subtitle = {index: number; start: string; end: string; text: string};
 
+// Model recommendations for subtitle translation tasks
+// Based on language capabilities, context handling, and translation quality
+export const modelRecommendations: { [key: string]: boolean } = {
+  // Highly Recommended (✓) - Excellent multilingual capabilities
+  "llama3.2:latest": true,
+  "llama3.1:latest": true,
+  "llama3:latest": true,
+  "qwen2.5:latest": true,
+  "qwen2:latest": true,
+  "gemma2:latest": true,
+  "gemma3n:latest": true,
+  "mistral:latest": true,
+  "command-r:latest": true,
+  "aya:latest": true,
+  
+  // Not Recommended (✗) - Poor for translation tasks
+  "codellama:latest": false,
+  "code-llama:latest": false,
+  "deepseek-coder:latest": false,
+  "magicoder:latest": false,
+  "phind-codellama:latest": false,
+  "starcoder:latest": false,
+  "wizardcoder:latest": false,
+  "sqlcoder:latest": false,
+  "stable-code:latest": false,
+  "codegemma:latest": false,
+};
+
+// Function to get recommendation status for a model
+export function getModelRecommendation(modelName: string): "recommended" | "not-recommended" | "unknown" {
+  // Normalize model name to check against our recommendations
+  const normalizedName = modelName.toLowerCase();
+  
+  // Check exact match first
+  if (modelRecommendations.hasOwnProperty(normalizedName)) {
+    return modelRecommendations[normalizedName] ? "recommended" : "not-recommended";
+  }
+  
+  // Check for partial matches (e.g., "llama3.2:3b" should match "llama3.2:latest")
+  for (const [key, recommended] of Object.entries(modelRecommendations)) {
+    const baseKey = key.replace(":latest", "");
+    if (normalizedName.startsWith(baseKey)) {
+      return recommended ? "recommended" : "not-recommended";
+    }
+  }
+  
+  // Check for known coding models that aren't recommended
+  const codingKeywords = ["code", "coder", "sql", "programming"];
+  if (codingKeywords.some(keyword => normalizedName.includes(keyword))) {
+    return "not-recommended";
+  }
+  
+  // Default to unknown for unrecognized models
+  return "unknown";
+}
+
 function parseSrt(content: string): Subtitle[] {
   const parts = content.split(/\r?\n\r?\n/);
   const subs: Subtitle[] = [];

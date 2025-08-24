@@ -1,0 +1,73 @@
+---
+alwaysApply: true
+---
+- Use GObject Introspection for better integration with JavaScript.
+- Follow the GTK application structure for better maintainability.
+- Utilize CSS for styling GTK widgets to ensure a consistent look and feel.
+- Implement signal handling effectively to manage user interactions.
+
+---
+name: gnome-best-practices.mdc
+description: Best practices for GNOME development
+globs: **/*.{ts,tsx}
+---
+
+- Adhere to GNOME Human Interface Guidelines for user experience.
+- Use the GNOME Builder IDE for streamlined development and debugging.
+- Leverage the GNOME libraries for better integration with the desktop environment.
+- Ensure accessibility features are implemented for all applications.
+
+---
+name: typescript-best-practices.mdc 
+description: TypeScript coding standards and type safety guidelines
+globs: **/*.{ts,tsx}
+---
+
+- Use strict null checks to avoid runtime errors.
+- Prefer interface over type for defining object shapes.
+- Utilize type guards and assertions for better type safety.
+- Implement proper type inference to reduce redundancy in type declarations.
+
+---
+name: eslint-best-practices.mdc
+description: Best practices for ESLint configuration and usage
+globs: **/*.{ts,tsx,js,jsx}
+---
+
+- Use a consistent coding style by extending a well-defined ESLint configuration.
+- Enable TypeScript support in ESLint for type checking.
+- Regularly run ESLint as part of your build process to catch issues early.
+- Customize rules to fit your team's coding standards and project requirements.
+
+---
+name: prettier-best-practices.mdc
+description: Best practices for Prettier configuration and usage
+globs: **/*.{ts,tsx,js,jsx,json,css}
+---
+
+- Use Prettier to enforce consistent code formatting across the project.
+- Integrate Prettier with ESLint to avoid conflicts in formatting rules.
+- Configure Prettier settings in a `.prettierrc` file for project-specific preferences.
+- Run Prettier as part of your pre-commit hooks to ensure all code is formatted before merging.
+
+---
+name: esbuild-best-practices.mdc
+description: Best practices for using esbuild in your projects
+globs: **/*.{ts,tsx,js,jsx}
+---
+
+- Use esbuild for fast builds and bundling of JavaScript and TypeScript files.
+- Leverage esbuild's tree-shaking capabilities to reduce bundle size.
+- Configure esbuild to output source maps for easier debugging.
+- Utilize plugins to extend esbuild functionality as needed.
+
+---
+name: eslint-config-gnome-best-practices.mdc
+description: Best practices for using the GNOME ESLint configuration
+globs: **/*.{ts,tsx,js,jsx}
+---
+
+- Follow the GNOME ESLint configuration for consistency across GNOME projects.
+- Customize the configuration to fit specific project needs while maintaining core rules.
+- Regularly update the ESLint configuration to incorporate new best practices.
+- Use the configuration as a baseline for onboarding new developers to the project.

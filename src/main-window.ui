@@ -175,6 +175,22 @@
                         </child>
                       </object>
                     </child>
+                    <child>
+                      <object class="AdwActionRow" id="model-recommendation-row">
+                        <property name="title" translatable="yes">Recommended</property>
+                        <child type="prefix">
+                          <object class="GtkImage">
+                            <property name="icon-name">starred-symbolic</property>
+                          </object>
+                        </child>
+                        <child type="suffix">
+                          <object class="GtkImage" id="model-recommendation-icon">
+                            <property name="icon-name">dialog-question-symbolic</property>
+                            <property name="pixel-size">16</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
                   </object>
                 </child>
 

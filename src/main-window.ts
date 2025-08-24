@@ -30,7 +30,9 @@ const options = {
     "status-label",
     "model-info-group",
     "model-name-row",
-    "model-size-row"
+    "model-size-row",
+    "model-recommendation-row",
+    "model-recommendation-icon"
   ]
 };
 
@@ -288,10 +290,33 @@ class MainWindow extends Adw.ApplicationWindow {
       if (selectedModel) {
         modelNameRow.set_subtitle(selectedModel.name);
         modelSizeRow.set_subtitle(selectedModel.size || "Unknown");
-        modelInfoGroup.set_visible(true);
         
-        // Use the size info we already have from the models list
-        modelSizeRow.set_subtitle(selectedModel.size || "Unknown");
+        // Get recommendation status and update icon
+        const recommendation = Translator.getModelRecommendation(selectedModel.name);
+        const modelRecommendationIcon = (this as any)._model_recommendation_icon as Gtk.Image;
+        
+        switch (recommendation) {
+          case "recommended":
+            modelRecommendationIcon.icon_name = "emblem-default-symbolic";
+            modelRecommendationIcon.add_css_class("success");
+            modelRecommendationIcon.remove_css_class("error");
+            modelRecommendationIcon.remove_css_class("warning");
+            break;
+          case "not-recommended":
+            modelRecommendationIcon.icon_name = "process-stop-symbolic";
+            modelRecommendationIcon.add_css_class("error");
+            modelRecommendationIcon.remove_css_class("success");
+            modelRecommendationIcon.remove_css_class("warning");
+            break;
+          default:
+            modelRecommendationIcon.icon_name = "dialog-question-symbolic";
+            modelRecommendationIcon.add_css_class("warning");
+            modelRecommendationIcon.remove_css_class("success");
+            modelRecommendationIcon.remove_css_class("error");
+            break;
+        }
+        
+        modelInfoGroup.set_visible(true);
       } else {
         modelInfoGroup.set_visible(false);
       }
