@@ -253,79 +253,8 @@ export async function listInstalledModels(): Promise<Array<{name: string; size?:
   return [];
 }
 
-export const recommendedModels = [
-  {name: "gpt-oss:latest", display: "GPT-OSS (20.9B)", size: "~14GB"},
-  {name: "gemma3n:latest", display: "Gemma3n (6.9B)", size: "~7GB"},
-];
 
-export async function getModelInfo(modelName: string): Promise<{
-  name: string;
-  size?: string;
-  parameter_size?: string;
-  family?: string;
-}> {
-  const session = new Soup.Session();
-  const data = JSON.stringify({name: modelName});
-  
-  const url = "http://127.0.0.1:11434/api/show";
-  console.log(`Getting model info for: ${modelName}`);
-  
-  const message = Soup.Message.new("POST", url);
-  const headers = message.get_request_headers();
-  headers.append("Content-Type", "application/json");
-  
-  const bytes = GLib.Bytes.new(new TextEncoder().encode(data));
-  message.set_request_body_from_bytes("application/json", bytes);
 
-  return new Promise((resolve) => {
-    session.send_async(message, GLib.PRIORITY_DEFAULT, null, (session, result) => {
-      try {
-        const inputStream = session?.send_finish(result);
-        if (!inputStream) {
-          console.error("Failed to get model info from Ollama");
-          resolve({name: modelName});
-          return;
-        }
 
-        const bufferedStream = new Gio.BufferedInputStream({
-          base_stream: inputStream,
-          buffer_size: 8192
-        });
-
-        bufferedStream.read_bytes_async(8192, GLib.PRIORITY_DEFAULT, null, (stream, result) => {
-          try {
-            const bytes = stream?.read_bytes_finish(result);
-            if (!bytes) {
-              console.error("No data received from model info API");
-              resolve({name: modelName});
-              return;
-            }
-
-            const responseText = new TextDecoder().decode(bytes.get_data());
-            console.log(`Model info response: ${responseText}`);
-
-            if (responseText.trim()) {
-              const modelInfo = JSON.parse(responseText);
-              resolve({
-                name: modelName,
-                size: modelInfo.size ? `${Math.round(modelInfo.size / 1024 / 1024 / 1024 * 10) / 10}GB` : undefined,
-                parameter_size: modelInfo.details?.parameter_size || modelInfo.parameter_size,
-                family: modelInfo.details?.family || modelInfo.family
-              });
-            } else {
-              resolve({name: modelName});
-            }
-          } catch (e) {
-            console.error(`Error parsing model info response: ${e}`);
-            resolve({name: modelName});
-          }
-        });
-      } catch (e) {
-        console.error(`Error getting model info: ${e}`);
-        resolve({name: modelName});
-      }
-    });
-  });
-}
 
 

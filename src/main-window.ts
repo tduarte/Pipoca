@@ -250,37 +250,20 @@ class MainWindow extends Adw.ApplicationWindow {
 
     // populate models
     statusLabel.set_label("Loading models...");
-    let allModels: Array<{name: string; size?: string; display?: string; params?: string}> = [];
+    let allModels: Array<{name: string; size?: string; display?: string}> = [];
     
     (async () => {
       try {
         const installed = await Translator.listInstalledModels();
         console.log("Installed models:", installed);
         
-        // Create a set of installed model names for easy lookup
-        const installedNames = new Set(installed.map(m => m.name));
-        
-        // Add installed models first
+        // Use only installed models
         allModels = [...installed];
-        
-        // Add recommended models only if they're not already installed
-        let addedRecommended = 0;
-        for (const r of Translator.recommendedModels) {
-          if (!installedNames.has(r.name)) {
-            allModels.push({
-              name: r.name,
-              size: r.size,
-              display: `${r.display} (recommended)`,
-              params: r.display.match(/\((.*?)\)/)?.[1] || ""
-            });
-            addedRecommended++;
-          }
-        }
 
         // Create string list for models
         const modelStringList = Gtk.StringList.new(null);
         for (const model of allModels) {
-          const displayText = model.display || (model.name + (model.size ? ` (${model.size})` : ""));
+          const displayText = model.name + (model.size ? ` (${model.size})` : "");
           modelStringList.append(displayText);
         }
         
@@ -289,25 +272,10 @@ class MainWindow extends Adw.ApplicationWindow {
           modelRow.set_selected(0);
         }
         
-        statusLabel.set_label(`Found ${installed.length} installed models${addedRecommended > 0 ? ` + ${addedRecommended} recommended` : ""}`);
+        statusLabel.set_label(`Found ${installed.length} installed models`);
       } catch (error) {
         console.error("Error loading models:", error);
         statusLabel.set_label("Error loading models. Is Ollama running?");
-        
-        // Still add recommended models as fallback
-        allModels = Translator.recommendedModels.map(r => ({
-          name: r.name,
-          size: r.size,
-          display: `${r.display} (recommended)`,
-          params: r.display.match(/\((.*?)\)/)?.[1] || ""
-        }));
-        
-        const modelStringList = Gtk.StringList.new(null);
-        for (const model of allModels) {
-          modelStringList.append(model.display || model.name);
-        }
-        modelRow.set_model(modelStringList);
-        modelRow.set_selected(0);
       }
     })();
 
@@ -321,13 +289,8 @@ class MainWindow extends Adw.ApplicationWindow {
         modelSizeRow.set_subtitle(selectedModel.size || "Unknown");
         modelInfoGroup.set_visible(true);
         
-        // Get detailed model info from Ollama API
-        try {
-          const modelInfo = await Translator.getModelInfo(selectedModel.name);
-          modelSizeRow.set_subtitle(modelInfo.size || selectedModel.size || "Unknown");
-        } catch (e) {
-          console.error(`Failed to get model info: ${e}`);
-        }
+        // Use the size info we already have from the models list
+        modelSizeRow.set_subtitle(selectedModel.size || "Unknown");
       } else {
         modelInfoGroup.set_visible(false);
       }
@@ -429,7 +392,7 @@ class MainWindow extends Adw.ApplicationWindow {
         const langCode = popularLanguages[selectedLangIndex]?.[0] || "en";
         
         const selectedModelIndex = modelRow.get_selected();
-        const model = allModels[selectedModelIndex]?.name || Translator.recommendedModels[0]?.name || "llama3.2:latest";
+        const model = allModels[selectedModelIndex]?.name || "llama3.2:latest";
 
         // Start translation
         isTranslating = true;
