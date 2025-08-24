@@ -30,8 +30,7 @@ const options = {
     "status-label",
     "model-info-group",
     "model-name-row",
-    "model-size-row", 
-    "model-params-row"
+    "model-size-row"
   ]
 };
 
@@ -89,7 +88,6 @@ class MainWindow extends Adw.ApplicationWindow {
     const modelInfoGroup = (this as any)._model_info_group as Adw.PreferencesGroup;
     const modelNameRow = (this as any)._model_name_row as Adw.ActionRow;
     const modelSizeRow = (this as any)._model_size_row as Adw.ActionRow;
-    const modelParamsRow = (this as any)._model_params_row as Adw.ActionRow;
 
     let selectedFile: string | null = null;
 
@@ -321,17 +319,14 @@ class MainWindow extends Adw.ApplicationWindow {
       if (selectedModel) {
         modelNameRow.set_subtitle(selectedModel.name);
         modelSizeRow.set_subtitle(selectedModel.size || "Unknown");
-        modelParamsRow.set_subtitle("Loading...");
         modelInfoGroup.set_visible(true);
         
         // Get detailed model info from Ollama API
         try {
           const modelInfo = await Translator.getModelInfo(selectedModel.name);
           modelSizeRow.set_subtitle(modelInfo.size || selectedModel.size || "Unknown");
-          modelParamsRow.set_subtitle(modelInfo.parameter_size || "Unknown");
         } catch (e) {
           console.error(`Failed to get model info: ${e}`);
-          modelParamsRow.set_subtitle("Unknown");
         }
       } else {
         modelInfoGroup.set_visible(false);
