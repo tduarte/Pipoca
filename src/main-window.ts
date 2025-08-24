@@ -208,29 +208,30 @@ class MainWindow extends Adw.ApplicationWindow {
       Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
     );
 
-    // Populate target languages (20 most popular) with language codes for file naming
-    const popularLanguages = [
-      ["en", "English"],
-      ["es", "Spanish"], 
-      ["zh", "Chinese"],
-      ["hi", "Hindi"],
-      ["ar", "Arabic"],
-      ["pt", "Portuguese"],
-      ["bn", "Bengali"],
-      ["ru", "Russian"],
-      ["ja", "Japanese"],
-      ["fr", "French"],
-      ["de", "German"],
-      ["ko", "Korean"],
-      ["it", "Italian"],
-      ["tr", "Turkish"],
-      ["vi", "Vietnamese"],
-      ["pl", "Polish"],
-      ["uk", "Ukrainian"],
-      ["nl", "Dutch"],
-      ["th", "Thai"],
-      ["el", "Greek"]
-    ];
+          // Populate target languages (21 most popular) with language codes for file naming, sorted alphabetically by language name
+      const popularLanguages = [
+        ["ar", "🇸🇦  Arabic"],
+        ["bn", "🇧🇩  Bengali"],
+        ["zh", "🇨🇳  Chinese"],
+        ["nl", "🇳🇱  Dutch"],
+        ["en", "🇺🇸  English"],
+        ["fr", "🇫🇷  French"],
+        ["de", "🇩🇪  German"],
+        ["el", "🇬🇷  Greek"],
+        ["hi", "🇮🇳  Hindi"],
+        ["it", "🇮🇹  Italian"],
+        ["ja", "🇯🇵  Japanese"],
+        ["ko", "🇰🇷  Korean"],
+        ["pl", "🇵🇱  Polish"],
+        ["pt", "🇵🇹  Portuguese"],
+        ["pt-BR", "🇧🇷  Portuguese (Brazil)"],
+        ["ru", "🇷🇺  Russian"],
+        ["es", "🇪🇸  Spanish"], 
+        ["th", "🇹🇭  Thai"],
+        ["tr", "🇹🇷  Turkish"],
+        ["uk", "🇺🇦  Ukrainian"],
+        ["vi", "🇻🇳  Vietnamese"]
+      ];
 
     // Create string list for Adw.ComboRow
     const languageStringList = Gtk.StringList.new(null);
