@@ -59,12 +59,25 @@ if cachedir == ''
   cachedir = meson.project_build_root() / 'npm-cache'
 endif
 
-npm_ci = custom_target(
-  command: [npm, 'ci', '--cache', cachedir],
-  console: true,
-  depend_files: files('package-lock.json'),
-  output: 'npm-ci',
-)
+# Check if we're building in Flatpak sandbox
+is_flatpak = get_option('flatpak')
+if is_flatpak
+  # Use the generated sources for sandboxed builds
+  npm_ci = custom_target(
+    command: [npm, 'ci', '--cache', cachedir, '--prefer-offline', '--no-audit'],
+    console: true,
+    depend_files: files('package-lock.json', 'generated-sources.json'),
+    output: 'npm-ci',
+  )
+else
+  # Regular npm install for development builds
+  npm_ci = custom_target(
+    command: [npm, 'ci', '--cache', cachedir],
+    console: true,
+    depend_files: files('package-lock.json'),
+    output: 'npm-ci',
+  )
+endif
 
 custom_target(
   'node-esbuild',

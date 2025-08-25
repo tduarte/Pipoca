@@ -1,1 +1,2 @@
 option('cachedir', type: 'string')
+option('flatpak', type: 'boolean', value: false, description: 'Build for Flatpak sandbox')
