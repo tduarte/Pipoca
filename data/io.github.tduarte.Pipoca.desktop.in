@@ -1,11 +1,14 @@
 [Desktop Entry]
 Type = Application
 Name = Pipoca
+GenericName = Subtitle Translator
+Comment = AI-powered subtitle translation using local Ollama models
 Icon = @icon@
 TryExec = @try_exec@
 Exec = @exec@
 Terminal = false
-Categories = Media;
+Categories = AudioVideo;Utility;GTK;
 StartupNotify = true
 SingleMainWindow = true
 DBusActivatable = true
+Keywords = subtitle;translation;ai;ollama;srt;language;local;privacy;

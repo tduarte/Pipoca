@@ -1,5 +1,37 @@
 {
+  "name": "pipoca",
+  "version": "1.0.0",
+  "description": "AI-powered subtitle translation using local Ollama models",
   "type": "module",
+  "scripts": {
+    "build": "node scripts/esbuild.js src/app.ts builddir/app.js",
+    "dev": "node scripts/esbuild.js src/app.ts builddir/app.js --watch",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "subtitle",
+    "translation",
+    "ai",
+    "ollama",
+    "srt",
+    "language",
+    "local",
+    "privacy",
+    "gnome",
+    "gtk"
+  ],
+  "author": "Thiago Duarte <tduarte@github.com>",
+  "license": "BlueOak-1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tduarte/Pipoca.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tduarte/Pipoca/issues"
+  },
+  "homepage": "https://github.com/tduarte/Pipoca",
   "devDependencies": {
     "@girs/adw-1": "^1.8.0-4.0.0-beta.23",
     "@girs/gio-2.0": "^2.84.0-4.0.0-beta.23",

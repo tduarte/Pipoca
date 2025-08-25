@@ -3,7 +3,7 @@ project(
   license: 'BlueOak-1.0.0',
   license_files: 'LICENSE.md',
   meson_version: '>=1.1',
-  version: '1.0-alpha',
+  version: '1.0.0',
 )
 
 fs = import('fs')

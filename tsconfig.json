@@ -1,8 +1,16 @@
 {
   "extends": "@nyx_lyb3ra/tsconfig-gnome",
-  "exclude": ["_build"],
+  "exclude": ["builddir", "_build", "node_modules"],
   "compilerOptions": {
     "module": "preserve",
-    "noEmit": true
-  }
+    "noEmit": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "env.d.ts"
+  ]
 }

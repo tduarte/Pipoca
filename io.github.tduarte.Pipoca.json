@@ -14,19 +14,20 @@
     "--socket=wayland",
     "--socket=fallback-x11",
     "--device=dri",
-    "--share=network"
+    "--share=network",
+    "--filesystem=home",
+    "--filesystem=xdg-download",
+    "--filesystem=xdg-documents"
   ],
   "modules": [
     {
       "name": "pipoca",
       "buildsystem": "meson",
-      "build-options": {
-        "build-args": ["--share=network"]
-      },
       "sources": [
         {
-          "type": "dir",
-          "path": "."
+          "type": "git",
+          "url": "https://github.com/tduarte/Pipoca.git",
+          "branch": "main"
         }
       ]
     }

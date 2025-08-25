@@ -1,5 +1,42 @@
-/.flatpak
-/_build
-/node_modules
+# Build artifacts
+builddir/
+*.o
+*.so
+*.a
+*.la
+*.lo
+
+# Meson
+meson-logs/
+meson-private/
+meson-info/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Generated files
+*.pot
+*.po~
+*.mo
+*.gmo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.log
 /.flatpak-builder
-.xdp-test-subtitle.en.srt-CUW6fD
+/.flatpak
