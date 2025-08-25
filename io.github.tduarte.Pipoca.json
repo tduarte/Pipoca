@@ -25,9 +25,8 @@
       "buildsystem": "meson",
       "sources": [
         {
-          "type": "git",
-          "url": "https://github.com/tduarte/Pipoca.git",
-          "branch": "main"
+          "type": "dir",
+          "path": "."
         },
         {
           "type": "file",

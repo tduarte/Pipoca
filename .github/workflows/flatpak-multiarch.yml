@@ -1,0 +1,33 @@
+name: Flatpak Multi-Architecture Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  flatpak-multiarch:
+    name: "Flatpak Multi-Arch"
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-48
+      options: --privileged
+    strategy:
+      matrix:
+        variant:
+          - arch: x86_64
+            runner: ubuntu-latest
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+      # Don't fail the whole workflow if one architecture fails
+      fail-fast: false
+    runs-on: ${{ matrix.variant.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: pipoca-${{ matrix.variant.arch }}.flatpak
+          manifest-path: io.github.tduarte.Pipoca.json
+          cache-key: flatpak-builder-${{ matrix.variant.arch }}-${{ github.sha }}
+          arch: ${{ matrix.variant.arch }}
+          verbose: true
