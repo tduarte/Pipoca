@@ -15,6 +15,13 @@ jobs:
       options: --privileged
     steps:
       - uses: actions/checkout@v4
+      - name: Verify generated sources
+        run: |
+          if [ ! -f "generated-sources.json" ]; then
+            echo "Error: generated-sources.json not found"
+            exit 1
+          fi
+          echo "Generated sources file found and verified"
       - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           bundle: pipoca-sandbox.flatpak

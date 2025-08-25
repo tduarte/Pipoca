@@ -1,0 +1,33 @@
+name: Test Setup
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: "Test Setup"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Verify TypeScript
+        run: npm run type-check
+      - name: Verify build
+        run: npm run build
+      - name: Check generated sources
+        run: |
+          if [ ! -f "generated-sources.json" ]; then
+            echo "Error: generated-sources.json not found"
+            exit 1
+          fi
+          echo "Generated sources file found"
+          echo "File size: $(wc -c < generated-sources.json) bytes"

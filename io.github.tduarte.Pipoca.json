@@ -23,6 +23,11 @@
     {
       "name": "pipoca",
       "buildsystem": "meson",
+      "config-opts": [
+        "--prefix=/app",
+        "--buildtype=release",
+        "-Dflatpak=true"
+      ],
       "sources": [
         {
           "type": "dir",

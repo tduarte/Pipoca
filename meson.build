@@ -62,12 +62,13 @@ endif
 # Check if we're building in Flatpak sandbox
 is_flatpak = get_option('flatpak')
 if is_flatpak
-  # Use the generated sources for sandboxed builds
+  # Use the generated sources for sandboxed builds with offline mode
   npm_ci = custom_target(
-    command: [npm, 'ci', '--cache', cachedir, '--prefer-offline', '--no-audit'],
+    command: [npm, 'ci', '--cache', cachedir, '--prefer-offline', '--no-audit', '--no-fund', '--no-optional'],
     console: true,
     depend_files: files('package-lock.json', 'generated-sources.json'),
     output: 'npm-ci',
+    env: ['NPM_CONFIG_CACHE=' + cachedir, 'NPM_CONFIG_UPDATE_NOTIFIER=false']
   )
 else
   # Regular npm install for development builds
