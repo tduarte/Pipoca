@@ -20,13 +20,11 @@
     {
       "name": "pipoca",
       "buildsystem": "meson",
-      "build-options": {
-        "build-args": ["--share=network"]
-      },
       "sources": [
         {
-          "type": "dir",
-          "path": "."
+          "type": "git",
+          "url": "https://github.com/tduarte/Pipoca.git",
+          "branch": "main"
         }
       ]
     }
