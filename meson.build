@@ -51,20 +51,20 @@ configure_file(
   output: 'pipoca',
 )
 
-node = find_program('node')
-npm = find_program('npm')
+# Require node/npm (fail fast if the Node SDK ext isn't present)
+node = find_program('node', required: true)
+npm = find_program('npm', required: true)
 
-cachedir = get_option('cachedir')
-if cachedir == ''
-  cachedir = meson.project_build_root() / 'npm-cache'
-endif
+cachedir = meson.project_build_root() / 'flatpak-node/npm-cache'
 
 npm_ci = custom_target(
-  command: [npm, 'ci', '--cache', cachedir],
-  console: true,
+  'npm-ci',
+  command: ['npm', 'ci', '--offline', '--cache', cachedir, '--no-audit', '--fund=false', '--loglevel=verbose'],
   depend_files: files('package-lock.json'),
   output: 'npm-ci',
+  build_by_default: true
 )
+
 
 custom_target(
   'node-esbuild',
