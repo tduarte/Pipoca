@@ -1,43 +1,49 @@
 {
-  "id": "io.github.tduarte.Pipoca",
-  "command": "pipoca",
-  "runtime": "org.gnome.Platform",
-  "runtime-version": "48",
-  "sdk": "org.gnome.Sdk",
-  "sdk-extensions": ["org.freedesktop.Sdk.Extension.node24"],
-  "build-options": {
-    "prepend-path": "/usr/lib/sdk/node24/bin",
-    "prepend-ld-library-path": "/usr/lib/sdk/node24/lib"
-  },
-  "finish-args": [
-    "--share=ipc",
-    "--socket=wayland",
-    "--socket=fallback-x11",
-    "--device=dri",
-    "--share=network",
-    "--filesystem=home",
-    "--filesystem=xdg-download",
-    "--filesystem=xdg-documents"
-  ],
-  "modules": [
-    {
-      "name": "pipoca",
-      "buildsystem": "meson",
-      "config-opts": [
-        "--prefix=/app",
-        "--buildtype=release",
-        "-Dflatpak=true"
-      ],
-      "sources": [
-        {
-          "type": "dir",
-          "path": "."
-        },
-        {
-          "type": "file",
-          "path": "generated-sources.json"
+    "id" : "io.github.tduarte.Pipoca",
+    "command" : "pipoca",
+    "runtime" : "org.gnome.Platform",
+    "runtime-version" : "48",
+    "sdk" : "org.gnome.Sdk",
+    "sdk-extensions" : [
+        "org.freedesktop.Sdk.Extension.node24"
+    ],
+    "build-options" : {
+        "prepend-path" : "/usr/lib/sdk/node24/bin",
+        "prepend-ld-library-path" : "/usr/lib/sdk/node24/lib",
+        "env": {
+          "npm_config_offline": "true"
         }
-      ]
-    }
-  ]
+    },
+    "finish-args" : [
+        "--share=ipc",
+        "--socket=wayland",
+        "--socket=fallback-x11",
+        "--device=dri",
+        "--share=network",
+        "--filesystem=home",
+        "--filesystem=xdg-download",
+        "--filesystem=xdg-documents"
+    ],
+    "modules" : [
+        {
+            "name" : "pipoca",
+            "buildsystem" : "meson",
+            "config-opts" : [
+                "--prefix=/app",
+                "--buildtype=release",
+                "--libdir=lib"
+            ],
+            "sources" : [
+                {
+                    "type" : "dir",
+                    "path" : "."
+                },
+                {
+                    "type" : "file",
+                    "path" : "generated-sources.json"
+                }
+            ]
+        }
+    ]
 }
+
