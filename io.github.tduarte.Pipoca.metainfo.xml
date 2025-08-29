@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- © 2025 Thiago Duarte (https://github.com/tduarte) -->
+<component type="desktop-application">
+  <id>io.github.tduarte.Pipoca</id>
+
+  <!-- License: https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#license -->
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>BlueOak-1.0.0</project_license>
+
+  <!--
+    Name and summary:
+    https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#name-and-summary
+  -->
+  <name>Pipoca</name>
+  <summary>AI-powered subtitle translation using local Ollama models</summary>
+
+  <!--
+    Developer name:
+    https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#developer-name
+  -->
+  <developer id="io.github.tduarte">
+    <name translatable="no">Thiago Duarte</name>
+  </developer>
+
+  <!-- Description: https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#description -->
+  <description>
+    <p>
+      Pipoca is a modern, privacy-focused subtitle translation application that leverages local AI models through Ollama. 
+      Translate your subtitle files (.srt) to over 20 languages using powerful language models running entirely on your computer.
+    </p>
+    
+    <p>
+      Prerequisites: Ollama must be installed and running locally to use Pipoca. 
+      Pipoca connects to the local Ollama HTTP API at <code>127.0.0.1:11434</code>. No data is sent to remote servers.
+    </p>
+    
+    <p>
+      Key Features:
+    </p>
+    <ul>
+      <li>Local AI Processing: All translations happen on your machine using Ollama models</li>
+      <li>Multi-language Support: Translate to 20+ popular languages with flag emojis</li>
+      <li>Smart Model Selection: Built-in recommendations for translation-optimized models</li>
+      <li>Drag &amp; Drop: Easy file selection with visual feedback</li>
+      <li>Real-time Progress: Track translation progress with GNOME HIG-compliant progress bars</li>
+      <li>Privacy First: No data leaves your computer</li>
+      <li>Portal-Only File Access: Uses sandbox-friendly file open/save via portals</li>
+      <li>Modern UI: Beautiful Libadwaita interface following GNOME design principles</li>
+    </ul>
+    
+    <p>
+      Perfect for: Content creators, language learners, accessibility improvements, and anyone who needs 
+      to translate subtitle files while maintaining complete privacy and control over their data.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">io.github.tduarte.Pipoca.desktop</launchable>
+
+  <!--
+    Categories and keywords:
+    https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#categories-and-keywords
+  -->
+  <categories>
+    <category>AudioVideo</category>
+    <category>Utility</category>
+  </categories>
+  
+  <keywords>
+    <keyword>subtitle</keyword>
+    <keyword>translation</keyword>
+    <keyword>ai</keyword>
+    <keyword>ollama</keyword>
+    <keyword>srt</keyword>
+    <keyword>language</keyword>
+    <keyword>local</keyword>
+    <keyword>privacy</keyword>
+    <keyword>gnome</keyword>
+    <keyword>gtk</keyword>
+  </keywords>
+
+  <!-- Brand color: https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#brand-color -->
+  <branding>
+    <color type="primary" scheme_preference="light">#3584e4</color>
+    <color type="primary" scheme_preference="dark">#62a0ea</color>
+  </branding>
+
+  <!-- Open Age Rating Service: https://hughsie.github.io/oars/generate.html -->
+  <content_rating type="oars-1.1" />
+
+  <!-- URL: https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#url -->
+  <url type="bugtracker">https://github.com/tduarte/Pipoca/issues</url>
+  <url type="homepage">https://github.com/tduarte/Pipoca</url>
+  <url type="vcs-browser">https://github.com/tduarte/Pipoca</url>
+
+  <!-- Screenshots: https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#screenshots -->
+  <screenshots>
+    <screenshot type="default">
+      <image>
+        https://github.com/tduarte/Pipoca/raw/main/data/screenshots/screenshot1.png
+      </image>
+
+      <caption>Main interface with file selection and model information</caption>
+    </screenshot>
+  </screenshots>
+
+  <!-- Release: https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#release -->
+  <releases>
+    <release version="1.0.0" date="2025-01-23">
+      <description>
+        <p>Initial release of Pipoca - AI-powered subtitle translation</p>
+        <ul>
+          <li>Core subtitle translation functionality using local Ollama models</li>
+          <li>Support for 20+ languages</li>
+          <li>Smart model recommendations for translation tasks</li>
+          <li>Drag &amp; drop file selection with visual feedback</li>
+          <li>Real-time translation progress tracking</li>
+          <li>Modern Libadwaita UI following GNOME design principles</li>
+          <li>Complete privacy - all processing happens locally</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+
+  <translation type="gettext">pipoca</translation>
+
+  <!--
+    Device support:
+    https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#device-support
+  -->
+  <recommends>
+    <control>keyboard</control>
+    <control>pointing</control>
+    <control>touch</control>
+  </recommends>
+
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
+
+</component>
+
