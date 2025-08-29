@@ -51,20 +51,33 @@ configure_file(
   output: 'pipoca',
 )
 
-# Require node/npm (fail fast if the Node SDK ext isn't present)
+## Build JS bundle in-sandbox using Node SDK (offline)
+# Require node/npm from the Flatpak SDK extension
 node = find_program('node', required: true)
 npm = find_program('npm', required: true)
 
-cachedir = meson.project_build_root() / 'flatpak-node/npm-cache'
+# Use the same cache path where the manifest vendors npm artifacts
+cachedir = get_option('cachedir')
+if cachedir == ''
+  cachedir = meson.project_source_root() / 'flatpak-node/npm-cache'
+endif
 
 npm_ci = custom_target(
   'npm-ci',
-  command: ['npm', 'ci', '--offline', '--cache', cachedir, '--no-audit', '--fund=false', '--loglevel=verbose'],
-  depend_files: files('package-lock.json'),
+  command: [
+    npm, 'ci',
+    '--cache', cachedir,
+    '--no-audit',
+    '--fund=false',
+    '--loglevel=verbose',
+    '--prefer-offline',
+    '--offline',
+    '--omit=dev', # install only production deps (esbuild is in dependencies)
+  ],
+  depend_files: files('package-lock.json', '.npmrc'),
   output: 'npm-ci',
-  build_by_default: true
+  build_by_default: true,
 )
-
 
 custom_target(
   'node-esbuild',

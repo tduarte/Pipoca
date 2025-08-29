@@ -1,5 +1,6 @@
 ---
-alwaysApply: true
+description: When writing GTK applications that uses TypeScript
+alwaysApply: false
 ---
 - Use GObject Introspection for better integration with JavaScript.
 - Follow the GTK application structure for better maintainability.

@@ -14,9 +14,7 @@
           "XDG_CACHE_HOME": "/run/build/pipoca/flatpak-node/cache",
           "NPM_CONFIG_CACHE": "/run/build/pipoca/flatpak-node/npm-cache",
           "NPM_CONFIG_USERCONFIG": "/run/build/pipoca/.npmrc",
-          "npm_config_offline": "true",
           "npm_config_nodedir": "/usr/lib/sdk/node24"
-
         }
     },
     "finish-args" : [

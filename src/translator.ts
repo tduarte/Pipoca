@@ -67,9 +67,15 @@ function parseSrt(content: string): Subtitle[] {
   for (const part of parts) {
     const lines = part.split(/\r?\n/).filter(Boolean);
     if (lines.length >= 3) {
-      const index = parseInt(lines[0], 10);
-      const [times, ...textLines] = lines.slice(1);
-      const [start, end] = times.split(" --> ");
+      const [indexLine, ...rest] = lines as [string, ...string[]];
+      const index = Number.parseInt(indexLine, 10);
+      const slice = rest as [string, ...string[]];
+      const times = slice[0];
+      const textLines = slice.slice(1);
+
+      const timeSplit = times.split(" --> ");
+      if (timeSplit.length !== 2) continue;
+      const [start, end] = timeSplit as [string, string];
       subs.push({index, start, end, text: textLines.join(" ")});
     }
   }
@@ -99,7 +105,7 @@ async function callOllama(model: string, prompt: string): Promise<string> {
   message.set_request_body_from_bytes("application/json", bytes);
 
   return new Promise((resolve, reject) => {
-    session.send_async(message, GLib.PRIORITY_DEFAULT, null, (session, result) => {
+    session.send_async(message, GLib.PRIORITY_DEFAULT, null, (_session: any, result: any) => {
       try {
         const inputStream = session?.send_finish(result);
         if (!inputStream) {
@@ -121,7 +127,7 @@ async function callOllama(model: string, prompt: string): Promise<string> {
         let responseText = "";
         
         const readNext = () => {
-          bufferedInputStream.read_bytes_async(4096, GLib.PRIORITY_DEFAULT, null, (stream, result) => {
+          bufferedInputStream.read_bytes_async(4096, GLib.PRIORITY_DEFAULT, null, (stream: any, result: any) => {
             try {
               const bytes = stream?.read_bytes_finish(result);
               if (bytes && bytes.get_size() > 0) {
@@ -188,12 +194,10 @@ export async function translateSrtFile(
   const total = subs.length;
   const translated: Subtitle[] = [];
 
-  for (let i = 0; i < subs.length; i++) {
+  for (const [i, s] of subs.entries()) {
     if (cancellation?.isCancelled) {
       throw new Error("Translation was cancelled");
     }
-    
-    const s = subs[i];
     const prompt = `Translate the following subtitle text to ${targetLanguage} without changing timing. Respond with only the translated text: ${s.text}`;
     const out = await callOllama(model, prompt);
     translated.push({index: s.index, start: s.start, end: s.end, text: out.trim()});
@@ -213,7 +217,7 @@ export async function listInstalledModels(): Promise<Array<{name: string; size?:
     const message = Soup.Message.new("GET", url);
 
     const result = await new Promise<Array<{name: string; size?: string}>>((resolve) => {
-      session.send_async(message, GLib.PRIORITY_DEFAULT, null, (session, result) => {
+      session.send_async(message, GLib.PRIORITY_DEFAULT, null, (_session: any, result: any) => {
         try {
           const inputStream = session?.send_finish(result);
           if (!inputStream) {
@@ -237,10 +241,9 @@ export async function listInstalledModels(): Promise<Array<{name: string; size?:
         
         const readAllData = () => {
           let responseText = "";
-          const buffer = new Uint8Array(4096);
           
           const readNext = () => {
-            bufferedInputStream.read_bytes_async(4096, GLib.PRIORITY_DEFAULT, null, (stream, result) => {
+            bufferedInputStream.read_bytes_async(4096, GLib.PRIORITY_DEFAULT, null, (stream: any, result: any) => {
               try {
                 const bytes = stream?.read_bytes_finish(result);
                 if (bytes && bytes.get_size() > 0) {
@@ -257,17 +260,27 @@ export async function listInstalledModels(): Promise<Array<{name: string; size?:
                       console.log(`Parsed response:`, parsed);
                       
                       if (parsed && parsed.models) {
-                        const models = parsed.models.map((m: any) => ({
-                          name: m.name ?? m.model ?? m,
-                          size: m.size ? `${Math.round(m.size / (1024*1024*1024))}GB` : undefined
-                        }));
+                        const models = parsed.models.map((m: any) => {
+                          const model: {name: string; size?: string} = {
+                            name: (m.name ?? m.model ?? m) as string,
+                          };
+                          if (m.size) {
+                            model.size = `${Math.round(m.size / (1024 * 1024 * 1024))}GB`;
+                          }
+                          return model;
+                        });
                         console.log(`Mapped models:`, models);
                         resolve(models);
                       } else if (Array.isArray(parsed)) {
-                        const models = parsed.map((m: any) => ({
-                          name: m.name ?? m.model ?? m,
-                          size: m.size ? `${Math.round(m.size / (1024*1024*1024))}GB` : undefined
-                        }));
+                        const models = parsed.map((m: any) => {
+                          const model: {name: string; size?: string} = {
+                            name: (m.name ?? m.model ?? m) as string,
+                          };
+                          if (m.size) {
+                            model.size = `${Math.round(m.size / (1024 * 1024 * 1024))}GB`;
+                          }
+                          return model;
+                        });
                         console.log(`Mapped array models:`, models);
                         resolve(models);
                       } else {
@@ -308,8 +321,6 @@ export async function listInstalledModels(): Promise<Array<{name: string; size?:
   
   return [];
 }
-
-
 
 
 
