@@ -94,7 +94,13 @@ flatpak install flathub io.github.tduarte.Pipoca
    - Choose your target language from 20+ options
    - Select an AI model (installed models + recommended options)
    - Toggle auto-save to automatically name files with language codes
-   - Click "Start Translation" and watch the magic happen! ✨
+- Click "Start Translation" and watch the magic happen! ✨
+
+## 🔒 Sandbox & Portals
+
+- File access: Pipoca uses Flatpak portals exclusively. It cannot see your filesystem unless you pick a file/folder in an open/save dialog or drop a file onto the window. Drag-and-drop also goes through the document portal.
+- Open/Save: The app uses `Gtk.FileDialog`, which is portal-aware. You’ll be prompted to choose the input `.srt` and where to save the translated file.
+- Network: The app connects only to your local Ollama service at `127.0.0.1:11434`. No subtitle content is sent to remote servers.
 
 ## 🛠️ Development
 
@@ -105,6 +111,11 @@ flatpak install flathub io.github.tduarte.Pipoca
 - **Build System**: Meson + Flatpak
 - **AI Backend**: Ollama HTTP API
 - **Bundler**: ESBuild
+
+### Flatpak Build Notes
+
+- The Flatpak manifest vendors the Node cache for an offline, sandboxed build using the Node 24 SDK extension. No internet is required during the builder phase.
+- The app no longer requests broad filesystem access (no `--filesystem=home`). All file interactions use portals.
 
 
 ### Project Structure

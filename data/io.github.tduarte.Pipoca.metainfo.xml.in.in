@@ -30,8 +30,8 @@
     </p>
     
     <p>
-      Prerequisites: Ollama must be installed on your system to use Pipoca. 
-      Download Ollama from for your operating system if you haven't installed it yet.
+      Prerequisites: Ollama must be installed and running locally to use Pipoca. 
+      Pipoca connects to the local Ollama HTTP API at <code>127.0.0.1:11434</code>. No data is sent to remote servers.
     </p>
     
     <p>
@@ -44,6 +44,7 @@
       <li>Drag &amp; Drop: Easy file selection with visual feedback</li>
       <li>Real-time Progress: Track translation progress with GNOME HIG-compliant progress bars</li>
       <li>Privacy First: No data leaves your computer</li>
+      <li>Portal-Only File Access: Uses sandbox-friendly file open/save via portals</li>
       <li>Modern UI: Beautiful Libadwaita interface following GNOME design principles</li>
     </ul>
     

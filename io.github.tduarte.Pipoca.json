@@ -22,10 +22,7 @@
         "--socket=wayland",
         "--socket=fallback-x11",
         "--device=dri",
-        "--share=network",
-        "--filesystem=home",
-        "--filesystem=xdg-download",
-        "--filesystem=xdg-documents"
+        "--share=network"
     ],
     "modules" : [
         {
@@ -46,4 +43,3 @@
         }
     ]
 }
-

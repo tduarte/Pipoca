@@ -127,34 +127,30 @@ class MainWindow extends Adw.ApplicationWindow {
       translateBtn.set_sensitive(true);
     };
 
-    // Function to show file dialog
+    // Function to show file dialog (portal-aware)
     const showFileDialog = () => {
-      const dialog = new Gtk.FileChooserNative({
-        transient_for: this,
-        action: Gtk.FileChooserAction.OPEN,
-        accept_label: "Select",
-        cancel_label: "Cancel",
-      });
+      const dialog = new Gtk.FileDialog({title: _("Select Subtitle File")});
 
-      const filter = new Gtk.FileFilter();
-      filter.set_name("SRT Files");
-      filter.add_pattern("*.srt");
-      dialog.add_filter(filter);
+      // Add *.srt filter
+      const srtFilter = new Gtk.FileFilter();
+      srtFilter.set_name("SRT Files");
+      srtFilter.add_pattern("*.srt");
 
-      dialog.connect("response", (dialog: Gtk.FileChooserNative, response_id: number) => {
-        if (response_id === Gtk.ResponseType.ACCEPT) {
-          const file = dialog.get_file();
-          if (file) {
-            const filePath = file.get_path();
-            if (filePath) {
-              handleFileSelection(filePath);
-            }
+      const filters = Gio.ListStore.new(Gtk.FileFilter.$gtype);
+      filters.append(srtFilter);
+      dialog.set_filters(filters);
+
+      dialog.open(this, null, (_obj, res) => {
+        try {
+          const file = dialog.open_finish(res);
+          const filePath = file.get_path();
+          if (filePath) {
+            handleFileSelection(filePath);
           }
+        } catch (e) {
+          // Cancelled or failed; no-op
         }
-        dialog.destroy();
       });
-
-      dialog.show();
     };
 
     // Set up drag and drop for the drop zone
@@ -379,38 +375,29 @@ class MainWindow extends Adw.ApplicationWindow {
           suggestedName = `${inputBasename}.${langCode}`;
         }
         
-        const saveDialog = new Gtk.FileChooserNative({
-          transient_for: this,
-          action: Gtk.FileChooserAction.SAVE,
-          accept_label: "Save",
-          cancel_label: "Cancel",
-        });
-        saveDialog.set_current_name(suggestedName);
-        
-        saveDialog.connect("response", (dialog: Gtk.FileChooserNative, response_id: number) => {
-          if (response_id === Gtk.ResponseType.ACCEPT) {
-            const file = dialog.get_file();
+        const saveDialog = new Gtk.FileDialog({title: _("Save Translation")});
+        saveDialog.set_initial_name(suggestedName);
+
+        saveDialog.save(this, null, (_obj, res) => {
+          try {
+            const file = saveDialog.save_finish(res);
             if (file && translationOutput) {
-              try {
-                const outputData = new TextEncoder().encode(translationOutput);
-                file.replace_contents(outputData, null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null);
-                statusLabel.set_label(`Translation saved as ${file.get_basename()}`);
-                
-                // Reset state for new translation
-                translationOutput = null;
-                isTranslated = false;
-                isTranslating = false;
-                translationCancellation = null;
-                updateButtonState();
-              } catch (e) {
-                statusLabel.set_label(`Error saving file: ${e}`);
-              }
+              const outputData = new TextEncoder().encode(translationOutput);
+              file.replace_contents(outputData, null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null);
+              statusLabel.set_label(`Translation saved as ${file.get_basename()}`);
+
+              // Reset state for new translation
+              translationOutput = null;
+              isTranslated = false;
+              isTranslating = false;
+              translationCancellation = null;
+              updateButtonState();
             }
+          } catch (e) {
+            // Cancelled or failed
+            statusLabel.set_label(typeof e === 'string' ? e : `Error saving file`);
           }
-          dialog.destroy();
         });
-        
-        saveDialog.show();
       } else {
         // Translate mode - start translation
         const selectedLangIndex = targetLangRow.get_selected();
