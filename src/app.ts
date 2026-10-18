@@ -3,6 +3,7 @@ import GLib from "gi://GLib";
 import GObject from "gi://GObject";
 
 import MainWindow from "./main-window.js";
+import {server} from "./llama-server.js";
 
 const options = {GTypeName: "PipocaApp"};
 
@@ -17,6 +18,11 @@ class App extends Adw.Application {
 
   public override vfunc_activate(): void {
     this.activeWindow.present();
+  }
+
+  public override vfunc_shutdown(): void {
+    server.stop();
+    super.vfunc_shutdown();
   }
 
   public override vfunc_startup(): void {

@@ -6,6 +6,8 @@ import {gettext as _} from "gettext";
 
 import Template from "./main-window.ui";
 import * as Translator from "./translator";
+import * as Models from "./models";
+import {server} from "./llama-server";
 import Gtk from "gi://Gtk";
 import GLib from "gi://GLib";
 import Gdk from "gi://Gdk";
@@ -24,20 +26,27 @@ const options = {
     "change-file-button",
     "target-language-row", 
     "model-row",
+    "manage-models-button",
 
     "translate-button",
     "progress-bar",
     "status-label",
-    "model-info-group",
-    "model-name-row",
-    "model-size-row",
-    "model-recommendation-row",
-    "model-recommendation-icon"
+
+    "main-stack",
+    "back-button",
+    "onboarding-icon",
+    "onboarding-title",
+    "onboarding-description",
+    "model-choice-group",
+    "download-button",
+    "download-progress",
+    "download-status"
   ]
 };
 
 class MainWindow extends Adw.ApplicationWindow {
   private readonly _settings = Gio.Settings.new(Config.APP_ID);
+  private _showModelManager: (() => void) | null = null;
 
   public constructor(props?: Partial<Adw.ApplicationWindow.ConstructorProps>) {
     super(props);
@@ -53,6 +62,7 @@ class MainWindow extends Adw.ApplicationWindow {
 
     this.add_action_entries([
       {activate: this.showAboutDialog.bind(this), name: "show-about-dialog"},
+      {activate: () => this._showModelManager?.(), name: "manage-models"},
     ]);
   }
 
@@ -83,13 +93,21 @@ class MainWindow extends Adw.ApplicationWindow {
     const changeFileButton = (this as any)._change_file_button as Gtk.Button;
     const targetLangRow = (this as any)._target_language_row as Adw.ComboRow;
     const modelRow = (this as any)._model_row as Adw.ComboRow;
+    const manageModelsButton = (this as any)._manage_models_button as Gtk.Button;
 
     const translateBtn = (this as any)._translate_button as Gtk.Button;
     const progressBar = (this as any)._progress_bar as Gtk.ProgressBar;
     const statusLabel = (this as any)._status_label as Gtk.Label;
-    const modelInfoGroup = (this as any)._model_info_group as Adw.PreferencesGroup;
-    const modelNameRow = (this as any)._model_name_row as Adw.ActionRow;
-    const modelSizeRow = (this as any)._model_size_row as Adw.ActionRow;
+
+    const mainStack = (this as any)._main_stack as Gtk.Stack;
+    const backButton = (this as any)._back_button as Gtk.Button;
+    const onboardingIcon = (this as any)._onboarding_icon as Gtk.Image;
+    const onboardingTitle = (this as any)._onboarding_title as Gtk.Label;
+    const onboardingDescription = (this as any)._onboarding_description as Gtk.Label;
+    const modelChoiceGroup = (this as any)._model_choice_group as Adw.PreferencesGroup;
+    const downloadButton = (this as any)._download_button as Gtk.Button;
+    const downloadProgress = (this as any)._download_progress as Gtk.ProgressBar;
+    const downloadStatus = (this as any)._download_status as Gtk.Label;
 
     let selectedFile: string | null = null;
 
@@ -143,7 +161,7 @@ class MainWindow extends Adw.ApplicationWindow {
       dialog.open(this, null, (_obj, res) => {
         try {
           const file = dialog.open_finish(res);
-          const filePath = file.get_path();
+          const filePath = file?.get_path();
           if (filePath) {
             handleFileSelection(filePath);
           }
@@ -207,37 +225,51 @@ class MainWindow extends Adw.ApplicationWindow {
     );
 
           // Populate target languages (21 most popular) with language codes for file naming, sorted alphabetically by language name
-      const popularLanguages = [
-        ["ar", "🇸🇦  Arabic"],
-        ["bn", "🇧🇩  Bengali"],
-        ["zh", "🇨🇳  Chinese"],
-        ["nl", "🇳🇱  Dutch"],
-        ["en", "🇺🇸  English"],
-        ["fr", "🇫🇷  French"],
-        ["de", "🇩🇪  German"],
-        ["el", "🇬🇷  Greek"],
-        ["hi", "🇮🇳  Hindi"],
-        ["it", "🇮🇹  Italian"],
-        ["ja", "🇯🇵  Japanese"],
-        ["ko", "🇰🇷  Korean"],
-        ["pl", "🇵🇱  Polish"],
-        ["pt", "🇵🇹  Portuguese"],
-        ["pt-BR", "🇧🇷  Portuguese (Brazil)"],
-        ["ru", "🇷🇺  Russian"],
-        ["es", "🇪🇸  Spanish"], 
-        ["th", "🇹🇭  Thai"],
-        ["tr", "🇹🇷  Turkish"],
-        ["uk", "🇺🇦  Ukrainian"],
-        ["vi", "🇻🇳  Vietnamese"]
+      const popularLanguages: Translator.Language[] = [
+        {code: "ar", flag: "🇸🇦", name: "Arabic"},
+        {code: "bn", flag: "🇧🇩", name: "Bengali"},
+        {code: "zh", flag: "🇨🇳", name: "Chinese"},
+        {code: "nl", flag: "🇳🇱", name: "Dutch"},
+        {code: "en", flag: "🇺🇸", name: "English"},
+        {code: "fr", flag: "🇫🇷", name: "French"},
+        {code: "de", flag: "🇩🇪", name: "German"},
+        {code: "el", flag: "🇬🇷", name: "Greek"},
+        {code: "hi", flag: "🇮🇳", name: "Hindi"},
+        {code: "it", flag: "🇮🇹", name: "Italian"},
+        {code: "ja", flag: "🇯🇵", name: "Japanese"},
+        {code: "ko", flag: "🇰🇷", name: "Korean"},
+        {code: "pl", flag: "🇵🇱", name: "Polish"},
+        {code: "pt", flag: "🇵🇹", name: "Portuguese"},
+        {code: "pt-BR", flag: "🇧🇷", name: "Portuguese (Brazil)"},
+        {code: "ru", flag: "🇷🇺", name: "Russian"},
+        {code: "es", flag: "🇪🇸", name: "Spanish"},
+        {code: "th", flag: "🇹🇭", name: "Thai"},
+        {code: "tr", flag: "🇹🇷", name: "Turkish"},
+        {code: "uk", flag: "🇺🇦", name: "Ukrainian"},
+        {code: "vi", flag: "🇻🇳", name: "Vietnamese"}
       ];
 
-    // Create string list for Adw.ComboRow
-    const languageStringList = Gtk.StringList.new(null);
-    for (const [code, name] of popularLanguages) {
-      languageStringList.append(name || "");
-    }
-    targetLangRow.set_model(languageStringList);
-    targetLangRow.set_selected(0); // Default to English
+    // Only offer languages the active model can translate into
+    let visibleLanguages = popularLanguages;
+    const selectedLanguage = () => visibleLanguages[targetLangRow.get_selected()];
+
+    const refreshLanguages = () => {
+      const current = selectedLanguage()?.code ?? "en";
+      visibleLanguages = popularLanguages.filter(
+        ({code}) => !activeModel || Models.supportsLanguage(activeModel, code),
+      );
+
+      // Create string list for Adw.ComboRow
+      const languageStringList = Gtk.StringList.new(null);
+      for (const {flag, name} of visibleLanguages) {
+        languageStringList.append(`${flag}  ${name}`);
+      }
+      targetLangRow.set_model(languageStringList);
+
+      // Keep the current choice if possible, otherwise default to English
+      const index = visibleLanguages.findIndex(({code}) => code === current);
+      targetLangRow.set_selected(index >= 0 ? index : visibleLanguages.findIndex(({code}) => code === "en"));
+    };
 
 
 
@@ -246,79 +278,6 @@ class MainWindow extends Adw.ApplicationWindow {
     
     // Connect change file button to file dialog  
     changeFileButton.connect("clicked", showFileDialog);
-
-    // populate models
-    statusLabel.set_label("Loading models...");
-    let allModels: Array<{name: string; size?: string; display?: string}> = [];
-    
-    (async () => {
-      try {
-        const installed = await Translator.listInstalledModels();
-        console.log("Installed models:", installed);
-        
-        // Use only installed models
-        allModels = [...installed];
-
-        // Create string list for models
-        const modelStringList = Gtk.StringList.new(null);
-        for (const model of allModels) {
-          const displayText = model.name + (model.size ? ` (${model.size})` : "");
-          modelStringList.append(displayText);
-        }
-        
-        modelRow.set_model(modelStringList);
-        if (allModels.length > 0) {
-          modelRow.set_selected(0);
-        }
-        
-        statusLabel.set_label(`Found ${installed.length} installed models`);
-      } catch (error) {
-        console.error("Error loading models:", error);
-        statusLabel.set_label("Error loading models. Is Ollama running?");
-      }
-    })();
-
-    // Update model info when selection changes
-    const updateModelInfo = async () => {
-      const selectedIndex = modelRow.get_selected();
-      const selectedModel = allModels[selectedIndex];
-      
-      if (selectedModel) {
-        modelNameRow.set_subtitle(selectedModel.name);
-        modelSizeRow.set_subtitle(selectedModel.size || "Unknown");
-        
-        // Get recommendation status and update icon
-        const recommendation = Translator.getModelRecommendation(selectedModel.name);
-        const modelRecommendationIcon = (this as any)._model_recommendation_icon as Gtk.Image;
-        
-        switch (recommendation) {
-          case "recommended":
-            modelRecommendationIcon.icon_name = "emblem-default-symbolic";
-            modelRecommendationIcon.add_css_class("success");
-            modelRecommendationIcon.remove_css_class("error");
-            modelRecommendationIcon.remove_css_class("warning");
-            break;
-          case "not-recommended":
-            modelRecommendationIcon.icon_name = "process-stop-symbolic";
-            modelRecommendationIcon.add_css_class("error");
-            modelRecommendationIcon.remove_css_class("success");
-            modelRecommendationIcon.remove_css_class("warning");
-            break;
-          default:
-            modelRecommendationIcon.icon_name = "dialog-question-symbolic";
-            modelRecommendationIcon.add_css_class("warning");
-            modelRecommendationIcon.remove_css_class("success");
-            modelRecommendationIcon.remove_css_class("error");
-            break;
-        }
-        
-        modelInfoGroup.set_visible(true);
-      } else {
-        modelInfoGroup.set_visible(false);
-      }
-    };
-    
-    modelRow.connect("notify::selected", updateModelInfo);
 
     // State to track translation status
     let translationOutput: string | null = null;
@@ -343,7 +302,255 @@ class MainWindow extends Adw.ApplicationWindow {
         translateBtn.remove_css_class("destructive-action");
         translateBtn.add_css_class("suggested-action");
       }
+
+      // Keep the model fixed while a translation runs.
+      modelRow.set_sensitive(!isTranslating);
+      manageModelsButton.set_sensitive(!isTranslating);
     };
+
+    // Model management: onboarding, downloads and the engine
+    let activeModel: Models.CatalogModel | null = null;
+    let chosenModel: Models.CatalogModel | undefined = Models.suggestedModel();
+    let downloadCancellable: Gio.Cancellable | null = null;
+    let choiceRows: Adw.ActionRow[] = [];
+    let installedList: Models.CatalogModel[] = [];
+    let updatingModelRow = false;
+
+    const welcomeTitle = onboardingTitle.get_label();
+    const welcomeDescription = onboardingDescription.get_label();
+    onboardingIcon.set_from_icon_name(Config.APP_ID);
+
+    const memoryGB = Math.round(Models.totalMemoryGB());
+    const suggested = Models.suggestedModel();
+    if (memoryGB > 0 && suggested) {
+      modelChoiceGroup.set_description(
+        `This computer has ${memoryGB} GB of memory. We recommend ${suggested.name}.`,
+      );
+    }
+
+    const activateModel = (model: Models.CatalogModel) => {
+      activeModel = model;
+      this._settings.set_string("model-id", model.id);
+      refreshLanguages();
+      statusLabel.set_label(`Loading ${model.name}...`);
+
+      // Warm up the engine so the first translation starts right away.
+      server.ensureRunning(Models.modelPath(model)).then(() => {
+        if (activeModel === model && !isTranslating) {
+          statusLabel.set_label(`Ready to translate with ${model.name}`);
+        }
+      }).catch((e: unknown) => {
+        if (activeModel === model) {
+          statusLabel.set_label(`Could not load ${model.name}: ${e instanceof Error ? e.message : e}`);
+        }
+      });
+    };
+
+    const refreshModelRow = () => {
+      installedList = Models.installedModels();
+      const modelStringList = Gtk.StringList.new(null);
+      for (const model of installedList) {
+        modelStringList.append(model.name);
+      }
+
+      updatingModelRow = true;
+      modelRow.set_model(modelStringList);
+      const index = activeModel ? installedList.indexOf(activeModel) : -1;
+      if (index >= 0) modelRow.set_selected(index);
+      updatingModelRow = false;
+
+      modelRow.set_subtitle(activeModel?.description ?? "");
+    };
+
+    modelRow.connect("notify::selected", () => {
+      if (updatingModelRow) return;
+      const model = installedList[modelRow.get_selected()];
+      if (model && model !== activeModel) {
+        activateModel(model);
+        modelRow.set_subtitle(model.description);
+      }
+    });
+
+    const updateDownloadButton = () => {
+      downloadButton.remove_css_class("suggested-action");
+      downloadButton.remove_css_class("destructive-action");
+      downloadButton.set_sensitive(chosenModel !== undefined);
+
+      if (downloadCancellable) {
+        downloadButton.set_label("Cancel Download");
+        downloadButton.add_css_class("destructive-action");
+      } else if (chosenModel && Models.isInstalled(chosenModel)) {
+        downloadButton.set_label("Use This Model");
+        downloadButton.add_css_class("suggested-action");
+      } else {
+        const size = chosenModel ? ` (${Models.formatSize(chosenModel.sizeBytes)})` : "";
+        downloadButton.set_label(`Download Model${size}`);
+        downloadButton.add_css_class("suggested-action");
+      }
+    };
+
+    const confirmDelete = (model: Models.CatalogModel) => {
+      const dialog = new Adw.AlertDialog({
+        heading: `Delete ${model.name}?`,
+        body: `This frees ${Models.formatSize(model.sizeBytes)} of disk space. You can download the model again later.`,
+      });
+      dialog.add_response("cancel", "Cancel");
+      dialog.add_response("delete", "Delete");
+      dialog.set_response_appearance("delete", Adw.ResponseAppearance.DESTRUCTIVE);
+      dialog.connect("response", (_dialog: Adw.AlertDialog, response: string) => {
+        if (response !== "delete") return;
+        if (model === activeModel) {
+          server.stop();
+          activeModel = null;
+          this._settings.set_string("model-id", "");
+        }
+        Models.deleteModel(model);
+        showModelManager();
+      });
+      dialog.present(this);
+    };
+
+    const rebuildModelChoices = () => {
+      for (const row of choiceRows) modelChoiceGroup.remove(row);
+      choiceRows = [];
+
+      let radioGroup: Gtk.CheckButton | null = null;
+      for (const model of Models.catalog) {
+        const row = new Adw.ActionRow({
+          title: model.name,
+          subtitle: `${model.description}\n${Models.formatSize(model.sizeBytes)} download${
+            model.minMemoryGB > 0 ? ` · needs ${model.minMemoryGB} GB of memory` : ""
+          }`,
+        });
+
+        const radio = new Gtk.CheckButton({valign: Gtk.Align.CENTER, active: model === chosenModel});
+        if (radioGroup) radio.set_group(radioGroup);
+        else radioGroup = radio;
+        radio.connect("toggled", () => {
+          if (radio.get_active()) {
+            chosenModel = model;
+            updateDownloadButton();
+          }
+        });
+        row.add_prefix(radio);
+        row.set_activatable_widget(radio);
+
+        if (model === suggested) {
+          const tag = new Gtk.Label({label: "Recommended", valign: Gtk.Align.CENTER});
+          tag.add_css_class("caption-heading");
+          tag.add_css_class("accent");
+          row.add_suffix(tag);
+        }
+
+        if (Models.isInstalled(model)) {
+          const deleteButton = new Gtk.Button({
+            icon_name: "user-trash-symbolic",
+            tooltip_text: "Delete Model",
+            valign: Gtk.Align.CENTER,
+          });
+          deleteButton.add_css_class("flat");
+          deleteButton.connect("clicked", () => confirmDelete(model));
+          row.add_suffix(deleteButton);
+        }
+
+        modelChoiceGroup.add(row);
+        choiceRows.push(row);
+      }
+    };
+
+    const showModelManager = () => {
+      const hasModels = Models.installedModels().length > 0;
+      if (!chosenModel || (activeModel && hasModels)) chosenModel = activeModel ?? suggested;
+
+      onboardingTitle.set_label(hasModels ? "Manage Models" : welcomeTitle);
+      onboardingDescription.set_label(
+        hasModels
+          ? "Larger models translate better but need more memory and take longer. Models run entirely on your computer."
+          : welcomeDescription,
+      );
+      rebuildModelChoices();
+      updateDownloadButton();
+      downloadStatus.set_label("");
+
+      backButton.set_visible(hasModels);
+      mainStack.set_visible_child_name("onboarding");
+    };
+    this._showModelManager = () => {
+      if (!isTranslating) showModelManager();
+    };
+
+    const showTranslator = () => {
+      // The active model may have been deleted in the model manager.
+      if (!activeModel) {
+        const fallback = Models.installedModels()[0];
+        if (fallback) activateModel(fallback);
+      }
+
+      backButton.set_visible(false);
+      refreshModelRow();
+      mainStack.set_visible_child_name("translate");
+    };
+
+    backButton.connect("clicked", () => {
+      if (!downloadCancellable) showTranslator();
+    });
+    manageModelsButton.connect("clicked", () => this._showModelManager?.());
+
+    downloadButton.connect("clicked", async () => {
+      if (downloadCancellable) {
+        downloadCancellable.cancel();
+        return;
+      }
+
+      const model = chosenModel;
+      if (!model) return;
+
+      if (!Models.isInstalled(model)) {
+        downloadCancellable = new Gio.Cancellable();
+        modelChoiceGroup.set_sensitive(false);
+        backButton.set_sensitive(false);
+        downloadProgress.set_fraction(0);
+        downloadProgress.set_text(null);
+        downloadProgress.set_visible(true);
+        downloadStatus.set_label(`Downloading ${model.name}...`);
+        updateDownloadButton();
+
+        try {
+          await Models.downloadModel(model, (received, total) => {
+            downloadProgress.set_fraction(total > 0 ? received / total : 0);
+            downloadProgress.set_text(`${Models.formatSize(received)} of ${Models.formatSize(total)}`);
+          }, downloadCancellable);
+        } catch (e) {
+          if (e instanceof GLib.Error && e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED)) {
+            downloadStatus.set_label("Download paused. It will resume where it left off.");
+          } else {
+            console.error("Model download failed:", e);
+            downloadStatus.set_label(e instanceof Error || e instanceof GLib.Error ? e.message : String(e));
+          }
+          return;
+        } finally {
+          downloadCancellable = null;
+          modelChoiceGroup.set_sensitive(true);
+          backButton.set_sensitive(true);
+          downloadProgress.set_visible(false);
+          updateDownloadButton();
+        }
+      }
+
+      activateModel(model);
+      showTranslator();
+    });
+
+    const savedModel = Models.getModel(this._settings.get_string("model-id"));
+    const initialModel = savedModel && Models.isInstalled(savedModel) ? savedModel : Models.installedModels()[0];
+    if (initialModel) {
+      activateModel(initialModel);
+      showTranslator();
+    } else {
+      refreshLanguages();
+      showModelManager();
+    }
+
 
     translateBtn.connect("clicked", async () => {
       if (!selectedFile) return;
@@ -359,8 +566,7 @@ class MainWindow extends Adw.ApplicationWindow {
       
       if (isTranslated && translationOutput) {
         // Save mode - show save dialog
-        const selectedLangIndex = targetLangRow.get_selected();
-        const langCode = popularLanguages[selectedLangIndex]?.[0] || "en";
+        const langCode = selectedLanguage()?.code || "en";
         const inputFile = Gio.File.new_for_path(selectedFile);
         const inputBasename = inputFile.get_basename() || "";
         
@@ -400,12 +606,12 @@ class MainWindow extends Adw.ApplicationWindow {
         });
       } else {
         // Translate mode - start translation
-        const selectedLangIndex = targetLangRow.get_selected();
-        const targetLang = popularLanguages[selectedLangIndex]?.[1] || "English";
-        const langCode = popularLanguages[selectedLangIndex]?.[0] || "en";
-        
-        const selectedModelIndex = modelRow.get_selected();
-        const model = allModels[selectedModelIndex]?.name || "llama3.2:latest";
+        const targetLang = selectedLanguage();
+        const model = activeModel;
+        if (!model || !targetLang) {
+          showModelManager();
+          return;
+        }
 
         // Start translation
         isTranslating = true;
@@ -413,7 +619,7 @@ class MainWindow extends Adw.ApplicationWindow {
         updateButtonState();
 
         progressBar.set_visible(true);
-        statusLabel.set_label("Translating...");
+        statusLabel.set_label(`Loading ${model.name}...`);
 
         try {
           const output = await Translator.translateSrtFile(selectedFile, targetLang, model, (done, total) => {

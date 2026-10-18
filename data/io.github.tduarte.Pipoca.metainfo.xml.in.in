@@ -12,7 +12,7 @@
     https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#name-and-summary
   -->
   <name>Pipoca</name>
-  <summary>AI-powered subtitle translation using local Ollama models</summary>
+  <summary>Translate subtitles with AI that runs on your computer</summary>
 
   <!--
     Developer name:
@@ -25,22 +25,22 @@
   <!-- Description: https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#description -->
   <description>
     <p>
-      Pipoca is a modern, privacy-focused subtitle translation application that leverages local AI models through Ollama. 
+      Pipoca is a modern, privacy-focused subtitle translation application powered by AI models that run entirely on your computer. 
       Translate your subtitle files (.srt) to over 20 languages using powerful language models running entirely on your computer.
     </p>
     
     <p>
-      Prerequisites: Ollama must be installed and running locally to use Pipoca. 
-      Pipoca connects to the local Ollama HTTP API at <code>127.0.0.1:11434</code>. No data is sent to remote servers.
+      Nothing else to install: on first launch, Pipoca suggests a translation model that suits your computer and downloads it.
+      Your subtitles never leave your computer; the network is only used to download models.
     </p>
     
     <p>
       Key Features:
     </p>
     <ul>
-      <li>Local AI Processing: All translations happen on your machine using Ollama models</li>
+      <li>Local AI Processing: All translations happen on your machine, using your GPU when available</li>
       <li>Multi-language Support: Translate to 20+ popular languages with flag emojis</li>
-      <li>Smart Model Selection: Built-in recommendations for translation-optimized models</li>
+      <li>Guided Setup: Choose from curated translation models, sized for your computer</li>
       <li>Drag &amp; Drop: Easy file selection with visual feedback</li>
       <li>Real-time Progress: Track translation progress with GNOME HIG-compliant progress bars</li>
       <li>Privacy First: No data leaves your computer</li>
@@ -69,7 +69,7 @@
     <keyword>subtitle</keyword>
     <keyword>translation</keyword>
     <keyword>ai</keyword>
-    <keyword>ollama</keyword>
+    <keyword>llama.cpp</keyword>
     <keyword>srt</keyword>
     <keyword>language</keyword>
     <keyword>local</keyword>

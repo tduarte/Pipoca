@@ -16,10 +16,10 @@
 ## ✨ Features
 
 - **Drag & Drop Interface** - Simply drag your `.srt` files into the beautiful drop zone
-- **Local AI Translation** - Uses your locally installed Ollama models for privacy and cost
+- **Local AI Translation** - Runs translation models on your own computer with a bundled [llama.cpp](https://github.com/ggml-org/llama.cpp) engine (GPU-accelerated via Vulkan)
+- **Guided Setup** - Suggests a model that suits your computer's memory and downloads it for you
 - **20+ Languages** - Supports the world's most popular languages with automatic file naming
 - **Smart Auto-Save** - Automatically saves translated files with language codes (e.g., `movie.en.srt`)
-- **Model Information** - View detailed information about your selected AI model
 - **Modern UI** - Beautiful Libadwaita interface that follows GNOME design guidelines
 - **Real-time Progress** - Live translation progress with visual feedback
 
@@ -29,22 +29,15 @@
 
 ## 🚀 Installation
 
-### Prerequisites
+Pipoca has no external dependencies. The translation engine is bundled with the app, and on first launch Pipoca offers these models:
 
-1. **Install Ollama** for AI translation:
-   ```bash
-   curl -fsSL https://ollama.ai/install.sh | sh
-   ```
+| Model | Download | Notes |
+|---|---|---|
+| [Index-Translate 2B](https://huggingface.co/IndexTeam/Index-Translate-2B-GGUF) | 1.3 GB | Small and fast; suggested for computers with less than 12 GB of memory |
+| [Index-Translate 9B](https://huggingface.co/IndexTeam/Index-Translate-9B-GGUF) | 5.8 GB | Best quality; suggested for computers with 12 GB of memory or more |
+| [Hy-MT2 7B](https://huggingface.co/tencent/Hy-MT2-7B-GGUF) | 4.6 GB | Alternative from Tencent; does not support Greek |
 
-2. **Download AI models** (recommended):
-   ```bash
-   # Lightweight, fast models
-   ollama pull llama3.2:3b    # 2GB - Great for quick translations
-   ollama pull gemma2:2b      # 1.6GB - Efficient and accurate
-   
-   # More powerful models (optional)
-   ollama pull llama3.2:8b    # 4.7GB - Higher quality translations
-   ```
+Models are stored in `~/.var/app/io.github.tduarte.Pipoca/data/models` and can be added or removed from **Manage Models**.
 
 ### Installing Pipoca
 
@@ -79,28 +72,24 @@ flatpak install flathub io.github.tduarte.Pipoca
 
 ## 🎮 Usage
 
-1. **Start Ollama** (if not running):
-   ```bash
-   ollama serve
-   ```
-
-2. **Launch Pipoca**:
+1. **Launch Pipoca**:
    ```bash
    flatpak run io.github.tduarte.Pipoca
    ```
 
+2. **Pick a model** on first launch and wait for the download to finish.
+
 3. **Translate subtitles**:
    - Drag your `.srt` file into the drop zone OR click to select
    - Choose your target language from 20+ options
-   - Select an AI model (installed models + recommended options)
-   - Toggle auto-save to automatically name files with language codes
-- Click "Start Translation" and watch the magic happen! ✨
+   - Click "Start Translation" and watch the magic happen! ✨
 
 ## 🔒 Sandbox & Portals
 
 - File access: Pipoca uses Flatpak portals exclusively. It cannot see your filesystem unless you pick a file/folder in an open/save dialog or drop a file onto the window. Drag-and-drop also goes through the document portal.
 - Open/Save: The app uses `Gtk.FileDialog`, which is portal-aware. You’ll be prompted to choose the input `.srt` and where to save the translated file.
-- Network: The app connects only to your local Ollama service at `127.0.0.1:11434`. No subtitle content is sent to remote servers.
+- Network: Used only to download models from Hugging Face. Translation runs in a private `llama-server` process bound to `127.0.0.1`; no subtitle content is sent to remote servers.
+- GPU: `--device=dri` gives the bundled engine Vulkan access. If GPU startup fails, Pipoca falls back to the CPU.
 
 ## 🛠️ Development
 
@@ -109,12 +98,14 @@ flatpak install flathub io.github.tduarte.Pipoca
 - **Language**: TypeScript
 - **UI Framework**: GTK4 + Libadwaita
 - **Build System**: Meson + Flatpak
-- **AI Backend**: Ollama HTTP API
+- **AI Backend**: Bundled llama.cpp (`llama-server`, Vulkan + CPU backends)
 - **Bundler**: ESBuild
 
 ### Flatpak Build Notes
 
 - The Flatpak manifest vendors the Node cache for an offline, sandboxed build using the Node 24 SDK extension. No internet is required during the builder phase.
+- llama.cpp is built from a pinned release tag with `GGML_BACKEND_DL` and `GGML_CPU_ALL_VARIANTS`, so the right CPU backend is picked at runtime, plus the Vulkan backend for GPUs.
+- Outside Flatpak, Pipoca looks for `llama-server` in `PATH`, or uses `PIPOCA_LLAMA_SERVER` if set.
 - The app no longer requests broad filesystem access (no `--filesystem=home`). All file interactions use portals.
 
 
@@ -126,7 +117,9 @@ pipoca/
 │   ├── app.ts                    # Application entry point
 │   ├── main-window.ts            # Main window logic & UI handling
 │   ├── main-window.ui            # GTK UI definition
-│   └── translator.ts             # SRT parsing & Ollama integration
+│   ├── llama-server.ts           # Runs the bundled llama-server
+│   ├── models.ts                 # Model catalog & downloads
+│   └── translator.ts             # SRT parsing & prompts
 ├── data/                         # Application data files
 │   ├── icons/                    # App icons
 │   ├── screenshots/              # Screenshots for README
@@ -141,7 +134,7 @@ pipoca/
 
 - **Drag & Drop**: GTK4 `DropTarget` with custom CSS styling
 - **File Handling**: GIO File APIs for cross-platform file operations
-- **HTTP Client**: libsoup for Ollama API communication
+- **HTTP Client**: libsoup for model downloads and the llama-server API
 - **UI Components**: Libadwaita widgets (`AdwPreferencesGroup`, `AdwComboRow`, etc.)
 - **Async Operations**: GJS async/await patterns with proper error handling
 
@@ -155,7 +148,7 @@ We welcome contributions! Here's how you can help:
 2. Provide detailed information:
    - Pipoca version
    - Operating system
-   - Ollama version and installed models
+   - Translation model and GPU
    - Steps to reproduce
    - Expected vs actual behavior
 
@@ -195,20 +188,19 @@ Help translate Pipoca into more languages! We use standard gettext (`.po`) files
 - Ensure Flatpak is properly installed
 - Check if all dependencies are available: `flatpak list`
 
-**Models not loading:**
-- Verify Ollama is running: `ollama ps`
-- Check Ollama API: `curl http://localhost:11434/api/tags`
-- Ensure network permissions are enabled in Flatpak
+**Model download fails:**
+- Check your internet connection and free disk space
+- Click download again; interrupted downloads resume where they left off
 
-**Translation fails:**
-- Verify the selected model is downloaded: `ollama list`
-- Check Ollama logs for errors
+**Model fails to load or translation fails:**
+- Run Pipoca from a terminal to see the engine log (lines prefixed with `[llama-server]`)
+- Try a smaller model from **Manage Models**
 - Ensure the SRT file is properly formatted
 
 **Performance issues:**
-- Try smaller models (gemma2:2b, llama3.2:3b)
+- Try Index-Translate 2B
 - Close other applications to free up RAM
-- Consider using GPU acceleration if available
+- Make sure your GPU drivers support Vulkan (`vulkaninfo --summary`)
 
 ### Debug Mode
 
@@ -224,7 +216,8 @@ This project is licensed under the [Blue Oak Model License](LICENSE.md).
 ## Acknowledgments
 
 - **GNOME Team** for the amazing GTK4 and Libadwaita frameworks
-- **Ollama Team** for the incredible local AI model platform
+- **llama.cpp contributors** for the local inference engine
+- **Bilibili Index Team** and **Tencent Hunyuan Team** for the open translation models
 - **nyx_lyb3ra** for the [GNOME TypeScript Template](https://codeberg.org/nyx_lyb3ra/gnome-ts-template)
 - **Flatpak Team** for modern application distribution
 

@@ -1,64 +1,11 @@
 import Gio from "gi://Gio";
-import Soup from "gi://Soup";
-import GLib from "gi://GLib";
+
+import * as Models from "./models";
+import {server} from "./llama-server";
+
+export type Language = {code: string; flag: string; name: string};
 
 type Subtitle = {index: number; start: string; end: string; text: string};
-
-// Model recommendations for subtitle translation tasks
-// Based on language capabilities, context handling, and translation quality
-export const modelRecommendations: { [key: string]: boolean } = {
-  // Highly Recommended (✓) - Excellent multilingual capabilities
-  "llama3.2:latest": true,
-  "llama3.1:latest": true,
-  "llama3:latest": true,
-  "qwen2.5:latest": true,
-  "qwen2:latest": true,
-  "gemma2:latest": true,
-  "gemma3n:latest": true,
-  "mistral:latest": true,
-  "command-r:latest": true,
-  "aya:latest": true,
-  
-  // Not Recommended (✗) - Poor for translation tasks
-  "codellama:latest": false,
-  "code-llama:latest": false,
-  "deepseek-coder:latest": false,
-  "magicoder:latest": false,
-  "phind-codellama:latest": false,
-  "starcoder:latest": false,
-  "wizardcoder:latest": false,
-  "sqlcoder:latest": false,
-  "stable-code:latest": false,
-  "codegemma:latest": false,
-};
-
-// Function to get recommendation status for a model
-export function getModelRecommendation(modelName: string): "recommended" | "not-recommended" | "unknown" {
-  // Normalize model name to check against our recommendations
-  const normalizedName = modelName.toLowerCase();
-  
-  // Check exact match first
-  if (modelRecommendations.hasOwnProperty(normalizedName)) {
-    return modelRecommendations[normalizedName] ? "recommended" : "not-recommended";
-  }
-  
-  // Check for partial matches (e.g., "llama3.2:3b" should match "llama3.2:latest")
-  for (const [key, recommended] of Object.entries(modelRecommendations)) {
-    const baseKey = key.replace(":latest", "");
-    if (normalizedName.startsWith(baseKey)) {
-      return recommended ? "recommended" : "not-recommended";
-    }
-  }
-  
-  // Check for known coding models that aren't recommended
-  const codingKeywords = ["code", "coder", "sql", "programming"];
-  if (codingKeywords.some(keyword => normalizedName.includes(keyword))) {
-    return "not-recommended";
-  }
-  
-  // Default to unknown for unrecognized models
-  return "unknown";
-}
 
 function parseSrt(content: string): Subtitle[] {
   const parts = content.split(/\r?\n\r?\n/);
@@ -89,89 +36,90 @@ function buildSrt(subs: Subtitle[]): string {
     .join("\n");
 }
 
-async function callOllama(model: string, prompt: string): Promise<string> {
-  const session = new Soup.Session();
-  const data = JSON.stringify({model, prompt, stream: false});
-  
-  // Use 127.0.0.1 instead of localhost for better Flatpak compatibility
-  const url = "http://127.0.0.1:11434/api/generate";
-  console.log(`Calling Ollama at: ${url} with model: ${model}`);
-  
-  const message = Soup.Message.new("POST", url);
-  const headers = message.get_request_headers();
-  headers.append("Content-Type", "application/json");
-  
-  const bytes = GLib.Bytes.new(new TextEncoder().encode(data));
-  message.set_request_body_from_bytes("application/json", bytes);
+// A subtitle cue never needs more than this; it also stops runaway output.
+const MAX_OUTPUT_TOKENS = 256;
 
-  return new Promise((resolve, reject) => {
-    session.send_async(message, GLib.PRIORITY_DEFAULT, null, (_session: any, result: any) => {
-      try {
-        const inputStream = session?.send_finish(result);
-        if (!inputStream) {
-          reject(new Error("Failed to get response from Ollama"));
-          return;
-        }
-        
-        // Check HTTP status
-        const statusCode = message.get_status();
-        console.log(`HTTP Status: ${statusCode}`);
-        
-        if (statusCode !== 200) {
-          reject(new Error(`HTTP error: ${statusCode}`));
-          return;
-        }
+// Index-Translate is trained on Chinese instructions that name languages in
+// Chinese; these match the official client's mapping.
+const CHINESE_LANGUAGE_NAMES: Record<string, string> = {
+  ar: "阿拉伯语",
+  bn: "孟加拉语",
+  zh: "中文",
+  nl: "荷兰语",
+  en: "英语",
+  fr: "法语",
+  de: "德语",
+  el: "希腊语",
+  hi: "印地语",
+  it: "意大利语",
+  ja: "日语",
+  ko: "韩语",
+  pl: "波兰语",
+  pt: "葡萄牙语",
+  "pt-BR": "巴西葡萄牙语",
+  ru: "俄语",
+  es: "西班牙语",
+  th: "泰语",
+  tr: "土耳其语",
+  uk: "乌克兰语",
+  vi: "越南语",
+};
 
-        // Use buffered reading for better compatibility
-        const bufferedInputStream = Gio.BufferedInputStream.new(inputStream);
-        let responseText = "";
-        
-        const readNext = () => {
-          bufferedInputStream.read_bytes_async(4096, GLib.PRIORITY_DEFAULT, null, (stream: any, result: any) => {
-            try {
-              const bytes = stream?.read_bytes_finish(result);
-              if (bytes && bytes.get_size() > 0) {
-                const chunk = new TextDecoder().decode(bytes.get_data());
-                responseText += chunk;
-                readNext(); // Continue reading
-              } else {
-                // End of stream, process response
-                console.log("Ollama generate response:", responseText);
-                
-                if (responseText.trim()) {
-                  try {
-                    const parsed = JSON.parse(responseText);
-                    if (parsed && parsed.response) {
-                      resolve(parsed.response);
-                    } else {
-                      resolve(responseText.trim());
-                    }
-                  } catch (e) {
-                    resolve(responseText.trim());
-                  }
-                } else {
-                  reject(new Error("Empty response from Ollama"));
-                }
-              }
-            } catch (e) {
-              reject(e);
-            }
-          });
-        };
-        
-        readNext();
-      } catch (e) {
-        reject(e);
-      }
-    });
-  });
+// Prompts and sampling follow each model card. Neither model takes a system prompt.
+function buildRequest(model: Models.CatalogModel, text: string, target: Language): object {
+  switch (model.promptStyle) {
+    case "index-translate": {
+      const name = CHINESE_LANGUAGE_NAMES[target.code] ?? target.name;
+      return {
+        messages: [{role: "user", content: `请将以下文本翻译为${name}，直接输出翻译结果，不要进行任何解释。\n\n${text}`}],
+        temperature: 0,
+        chat_template_kwargs: {enable_thinking: false},
+      };
+    }
+    case "hy-mt": {
+      const name = target.code === "pt-BR" ? "Brazilian Portuguese" : target.name;
+      return {
+        messages: [
+          {
+            role: "user",
+            content: `Translate the following text into ${name}. Note that you should only output the translated result without any additional explanation:\n\n${text}`,
+          },
+        ],
+        temperature: 0.7,
+        top_p: 0.6,
+        top_k: 20,
+        repeat_penalty: 1.05,
+      };
+    }
+  }
+}
+
+async function translateText(
+  model: Models.CatalogModel,
+  text: string,
+  target: Language,
+  cancellable: Gio.Cancellable,
+): Promise<string> {
+  // Models often leave ALL-CAPS text (common in SDH subtitles) untranslated,
+  // so translate it in lowercase and restore the casing afterwards.
+  const allCaps = text === text.toUpperCase() && text !== text.toLowerCase();
+  const source = allCaps ? text.toLowerCase() : text;
+
+  let out = await server.chat({...buildRequest(model, source, target), max_tokens: MAX_OUTPUT_TOKENS}, cancellable);
+  // Safety net in case a thinking block slips through.
+  if (out.includes("</think>")) out = out.split("</think>")[1] ?? "";
+  // A blank line would end the cue early and corrupt the SRT file.
+  out = out.replace("<think>", "").trim().replace(/(\r?\n)+/g, "\n");
+  return allCaps ? out.toLocaleUpperCase(target.code) : out;
 }
 
 export class TranslationCancellation {
   private _cancelled = false;
+  readonly cancellable = new Gio.Cancellable();
   
   cancel() {
     this._cancelled = true;
+    this.cancellable.cancel();
   }
   
   get isCancelled() {
@@ -181,11 +129,13 @@ export class TranslationCancellation {
 
 export async function translateSrtFile(
   filePath: string,
-  targetLanguage: string,
-  model: string,
+  targetLanguage: Language,
+  model: Models.CatalogModel,
   onProgress?: (done: number, total: number) => void,
-  cancellation?: TranslationCancellation,
+  cancellation = new TranslationCancellation(),
 ): Promise<string> {
+  await server.ensureRunning(Models.modelPath(model));
+
   const file = Gio.File.new_for_path(filePath);
   const [, contents] = file.load_contents(null);
   const content = new TextDecoder().decode(contents);
@@ -195,133 +145,19 @@ export async function translateSrtFile(
   const translated: Subtitle[] = [];
 
   for (const [i, s] of subs.entries()) {
-    if (cancellation?.isCancelled) {
+    if (cancellation.isCancelled) {
       throw new Error("Translation was cancelled");
     }
-    const prompt = `Translate the following subtitle text to ${targetLanguage} without changing timing. Respond with only the translated text: ${s.text}`;
-    const out = await callOllama(model, prompt);
-    translated.push({index: s.index, start: s.start, end: s.end, text: out.trim()});
+    let out: string;
+    try {
+      out = await translateText(model, s.text, targetLanguage, cancellation.cancellable);
+    } catch (e) {
+      if (cancellation.isCancelled) throw new Error("Translation was cancelled");
+      throw e;
+    }
+    translated.push({index: s.index, start: s.start, end: s.end, text: out});
     onProgress?.(i + 1, total);
   }
 
   return buildSrt(translated);
 }
-
-export async function listInstalledModels(): Promise<Array<{name: string; size?: string}>> {
-  const session = new Soup.Session();
-  // Try both localhost and 127.0.0.1 - Flatpak might have issues with localhost
-  const urls = ["http://127.0.0.1:11434/api/tags", "http://localhost:11434/api/tags"];
-  
-  for (const url of urls) {
-    console.log(`Trying to connect to: ${url}`);
-    const message = Soup.Message.new("GET", url);
-
-    const result = await new Promise<Array<{name: string; size?: string}>>((resolve) => {
-      session.send_async(message, GLib.PRIORITY_DEFAULT, null, (_session: any, result: any) => {
-        try {
-          const inputStream = session?.send_finish(result);
-          if (!inputStream) {
-            console.error(`Failed to get input stream from ${url}`);
-            resolve([]);
-            return;
-          }
-          
-          // Check HTTP status
-          const statusCode = message.get_status();
-          console.log(`HTTP Status for ${url}: ${statusCode}`);
-          
-          if (statusCode !== 200) {
-            console.error(`HTTP error: ${statusCode}`);
-            resolve([]);
-            return;
-          }
-
-                  // Use a simpler approach to read the response
-        const bufferedInputStream = Gio.BufferedInputStream.new(inputStream);
-        
-        const readAllData = () => {
-          let responseText = "";
-          
-          const readNext = () => {
-            bufferedInputStream.read_bytes_async(4096, GLib.PRIORITY_DEFAULT, null, (stream: any, result: any) => {
-              try {
-                const bytes = stream?.read_bytes_finish(result);
-                if (bytes && bytes.get_size() > 0) {
-                  const chunk = new TextDecoder().decode(bytes.get_data());
-                  responseText += chunk;
-                  readNext(); // Continue reading
-                } else {
-                  // End of stream, process the complete response
-                  console.log(`Complete Ollama response from ${url}:`, responseText);
-                  
-                  if (responseText.trim()) {
-                    try {
-                      const parsed = JSON.parse(responseText);
-                      console.log(`Parsed response:`, parsed);
-                      
-                      if (parsed && parsed.models) {
-                        const models = parsed.models.map((m: any) => {
-                          const model: {name: string; size?: string} = {
-                            name: (m.name ?? m.model ?? m) as string,
-                          };
-                          if (m.size) {
-                            model.size = `${Math.round(m.size / (1024 * 1024 * 1024))}GB`;
-                          }
-                          return model;
-                        });
-                        console.log(`Mapped models:`, models);
-                        resolve(models);
-                      } else if (Array.isArray(parsed)) {
-                        const models = parsed.map((m: any) => {
-                          const model: {name: string; size?: string} = {
-                            name: (m.name ?? m.model ?? m) as string,
-                          };
-                          if (m.size) {
-                            model.size = `${Math.round(m.size / (1024 * 1024 * 1024))}GB`;
-                          }
-                          return model;
-                        });
-                        console.log(`Mapped array models:`, models);
-                        resolve(models);
-                      } else {
-                        console.error("Unexpected response format:", parsed);
-                        resolve([]);
-                      }
-                    } catch (e) {
-                      console.error("Error parsing JSON:", e, "Response:", responseText);
-                      resolve([]);
-                    }
-                  } else {
-                    console.error(`Empty response from ${url}`);
-                    resolve([]);
-                  }
-                }
-              } catch (e) {
-                console.error("Error reading chunk:", e);
-                resolve([]);
-              }
-            });
-          };
-          
-          readNext();
-        };
-        
-        readAllData();
-        } catch (e) {
-          console.error(`Error connecting to ${url}:`, e);
-          resolve([]);
-        }
-      });
-    });
-    
-    if (result.length > 0) {
-      return result;
-    }
-  }
-  
-  return [];
-}
-
-
-
-
