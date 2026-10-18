@@ -1,7 +1,7 @@
 {
   "name": "pipoca",
   "version": "1.0.0",
-  "description": "AI-powered subtitle translation using local Ollama models",
+  "description": "AI-powered subtitle translation using local llama.cpp models",
   "type": "module",
   "scripts": {
     "build": "node scripts/esbuild.js src/app.ts builddir/app.js",
@@ -14,7 +14,7 @@
     "subtitle",
     "translation",
     "ai",
-    "ollama",
+    "llama.cpp",
     "srt",
     "language",
     "local",

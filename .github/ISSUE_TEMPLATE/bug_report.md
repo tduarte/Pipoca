@@ -26,7 +26,8 @@ If applicable, add screenshots to help explain your problem.
 **Desktop (please complete the following information):**
  - Distro [e.g. Fedora]
  - Version [e.g. 22]
- - Ollama Version
+ - Translation model [e.g. Index-Translate 9B]
+ - GPU [e.g. AMD Radeon 780M, or none]
 
 **Additional context**
 Add any other context about the problem here.

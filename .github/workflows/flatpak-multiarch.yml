@@ -10,7 +10,7 @@ jobs:
   flatpak-multiarch:
     name: "Flatpak Multi-Arch"
     container:
-      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-48
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-50
       options: --privileged
     strategy:
       matrix:

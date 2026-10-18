@@ -2,7 +2,7 @@
     "id" : "io.github.tduarte.Pipoca",
     "command" : "pipoca",
     "runtime" : "org.gnome.Platform",
-    "runtime-version" : "48",
+    "runtime-version" : "50",
     "sdk" : "org.gnome.Sdk",
     "sdk-extensions" : [
         "org.freedesktop.Sdk.Extension.node24"
@@ -25,6 +25,62 @@
         "--share=network"
     ],
     "modules" : [
+        {
+            "name" : "spirv-headers",
+            "buildsystem" : "cmake-ninja",
+            "builddir" : true,
+            "config-opts" : [
+                "-DSPIRV_HEADERS_ENABLE_TESTS=OFF"
+            ],
+            "cleanup" : [
+                "*"
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://github.com/KhronosGroup/SPIRV-Headers.git",
+                    "tag" : "vulkan-sdk-1.4.363.0",
+                    "commit" : "496543121ce6419f23d6fa5d7194ba66c36212d2"
+                }
+            ]
+        },
+        {
+            "name" : "llama-cpp",
+            "buildsystem" : "cmake-ninja",
+            "builddir" : true,
+            "config-opts" : [
+                "-DCMAKE_BUILD_TYPE=Release",
+                "-DBUILD_SHARED_LIBS=ON",
+                "-DGGML_NATIVE=OFF",
+                "-DGGML_BACKEND_DL=ON",
+                "-DGGML_BACKEND_DIR=/app/lib/ggml",
+                "-DGGML_CPU_ALL_VARIANTS=ON",
+                "-DGGML_VULKAN=ON",
+                "-DLLAMA_BUILD_TESTS=OFF",
+                "-DLLAMA_BUILD_EXAMPLES=OFF",
+                "-DLLAMA_BUILD_APP=OFF",
+                "-DLLAMA_BUILD_UI=OFF",
+                "-DLLAMA_OPENSSL=OFF"
+            ],
+            "post-install" : [
+                "find /app/bin -type f -name 'llama-*' ! -name llama-server -delete",
+                "find /app/lib -name 'libllama-*-impl.so' ! -name libllama-server-impl.so -delete"
+            ],
+            "cleanup" : [
+                "/include",
+                "/lib/cmake",
+                "/lib/pkgconfig",
+                "/bin/*.py"
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://github.com/ggml-org/llama.cpp.git",
+                    "tag" : "b11716",
+                    "commit" : "797de63b2fa7396dcc8caca76834c699ac84e1c3"
+                }
+            ]
+        },
         {
             "name" : "pipoca",
             "buildsystem" : "meson",
