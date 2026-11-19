@@ -1,0 +1,8 @@
+data/gtk/help-overlay.ui
+data/io.github.tduarte.Pipoca.desktop.in
+data/io.github.tduarte.Pipoca.gschema.xml.in
+data/io.github.tduarte.Pipoca.metainfo.xml.in.in
+src/languages.ts
+src/main-window.ts
+src/main-window.ui
+src/models.ts

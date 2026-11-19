@@ -7,7 +7,7 @@
     </key>
 
     <key name="window-height" type="i">
-      <default>400</default>
+      <default>720</default>
       <summary>Window height</summary>
     </key>
 
@@ -15,6 +15,18 @@
       <default>""</default>
       <summary>Translation model</summary>
       <description>Identifier of the downloaded model used for translation</description>
+    </key>
+
+    <key name="target-language" type="s">
+      <default>"en"</default>
+      <summary>Target language</summary>
+      <description>Code of the language subtitles were last translated into</description>
+    </key>
+
+    <key name="use-context" type="b">
+      <default>false</default>
+      <summary>Use surrounding lines</summary>
+      <description>Whether the model is shown the subtitles before and after the one being translated</description>
     </key>
 
     <key name="window-width" type="i">

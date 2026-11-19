@@ -2,5 +2,6 @@
 <gresources>
   <gresource prefix="@prefix@">
     <file preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
+    <file>style.css</file>
   </gresource>
 </gresources>

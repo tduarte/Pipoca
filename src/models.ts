@@ -2,15 +2,19 @@ import Gio from "gi://Gio";
 import GLib from "gi://GLib";
 import Soup from "gi://Soup";
 
+import {_, fmt} from "./i18n";
+import type {PromptStyle} from "./prompts";
+
 Gio._promisify(Soup.Session.prototype, "send_async", "send_finish");
 Gio._promisify(
   Gio.InputStream.prototype,
   "read_bytes_async",
   "read_bytes_finish",
 );
+Gio._promisify(Gio.File.prototype, "read_async", "read_finish");
 
-/** How the model expects to be prompted; see translator.ts. */
-export type PromptStyle = "index-translate" | "hy-mt";
+// Marks a string for translation without translating it here.
+const N_ = (text: string): string => text;
 
 export type CatalogModel = {
   id: string;
@@ -18,6 +22,8 @@ export type CatalogModel = {
   description: string;
   url: string;
   sizeBytes: number;
+  /** SHA-256 of the file, as published by Hugging Face. */
+  sha256: string;
   /** Total system memory (GB) below which we don't suggest this model. */
   minMemoryGB: number;
   promptStyle: PromptStyle;
@@ -33,27 +39,30 @@ export const catalog: CatalogModel[] = [
   {
     id: "index-translate-2b",
     name: "Index-Translate 2B",
-    description: "Small and fast. Works on most computers.",
+    description: N_("Small and fast. Works on most computers."),
     url: "https://huggingface.co/IndexTeam/Index-Translate-2B-GGUF/resolve/main/Index-Translate-2B.Q4_K_M.gguf",
     sizeBytes: 1_312_164_352,
+    sha256: "044b313d29342bd3b2c77cbb64023ca0d209bd9b3247763f9d162767ef2d746a",
     minMemoryGB: 0,
     promptStyle: "index-translate",
   },
   {
     id: "index-translate-9b",
     name: "Index-Translate 9B",
-    description: "Best translation quality, but slower.",
+    description: N_("Best translation quality, but slower."),
     url: "https://huggingface.co/IndexTeam/Index-Translate-9B-GGUF/resolve/main/Index-Translate-9B.Q4_K_M.gguf",
     sizeBytes: 5_780_090_304,
+    sha256: "9cc6758b0007f4cbf42ea3400768cbff91ae74ef8d640e467158348426d33713",
     minMemoryGB: 12,
     promptStyle: "index-translate",
   },
   {
     id: "hy-mt2-7b",
     name: "Hy-MT2 7B",
-    description: "Proven alternative from Tencent. Does not support Greek.",
+    description: N_("Proven alternative from Tencent. Does not support Greek."),
     url: "https://huggingface.co/tencent/Hy-MT2-7B-GGUF/resolve/main/Hy-MT2-7B-Q4_K_M.gguf",
     sizeBytes: 4_624_648_896,
+    sha256: "9f96256500f3fc1ab4d64336b58f52a949a95ad7516b0c229476eef782f9f77b",
     minMemoryGB: 12,
     promptStyle: "hy-mt",
     alternative: true,
@@ -62,6 +71,9 @@ export const catalog: CatalogModel[] = [
 ];
 
 const DOWNLOAD_CHUNK_SIZE = 1024 * 1024;
+const CHECKSUM_CHUNK_SIZE = 4 * 1024 * 1024;
+
+export type DownloadPhase = "downloading" | "verifying";
 
 export function getModel(id: string): CatalogModel | undefined {
   return catalog.find(m => m.id === id);
@@ -131,13 +143,44 @@ function freeDiskSpace(dir: Gio.File): number | null {
   }
 }
 
+async function sha256(
+  file: Gio.File,
+  size: number,
+  onProgress: (done: number, total: number) => void,
+  cancellable: Gio.Cancellable,
+): Promise<string> {
+  const checksum = GLib.Checksum.new(GLib.ChecksumType.SHA256);
+  if (!checksum) throw new Error("SHA-256 is not available");
+
+  const input = await file.read_async(GLib.PRIORITY_DEFAULT, cancellable);
+  let done = 0;
+  try {
+    for (;;) {
+      const bytes = await input.read_bytes_async(
+        CHECKSUM_CHUNK_SIZE,
+        GLib.PRIORITY_DEFAULT,
+        cancellable,
+      );
+      const data = bytes.get_data();
+      if (!data || data.length === 0) break;
+      checksum.update(data);
+      done += data.length;
+      onProgress(done, size);
+    }
+  } finally {
+    input.close(null);
+  }
+  return checksum.get_string();
+}
+
 /**
- * Downloads `model` into modelsDir(). Partial downloads are kept as `.part`
- * files and resumed on the next attempt.
+ * Downloads `model` into modelsDir() and checks it against its published
+ * checksum. Partial downloads are kept as `.part` files and resumed on the
+ * next attempt.
  */
 export async function downloadModel(
   model: CatalogModel,
-  onProgress: (received: number, total: number) => void,
+  onProgress: (phase: DownloadPhase, done: number, total: number) => void,
   cancellable: Gio.Cancellable,
 ): Promise<void> {
   const dir = Gio.File.new_for_path(modelsDir());
@@ -155,7 +198,11 @@ export async function downloadModel(
   const free = freeDiskSpace(dir);
   if (free !== null && free < model.sizeBytes - offset) {
     throw new Error(
-      `Not enough disk space: ${formatSize(model.sizeBytes - offset)} needed, ${formatSize(free)} available`,
+      fmt(
+        _("Not enough disk space: %s needed, %s available"),
+        formatSize(model.sizeBytes - offset),
+        formatSize(free),
+      ),
     );
   }
 
@@ -181,7 +228,7 @@ export async function downloadModel(
   } else {
     // A stale .part file can make the range request invalid (416); start over next time.
     if (status === 416) part.delete(null);
-    throw new Error(`Download failed (HTTP ${status})`);
+    throw new Error(fmt(_("Download failed (HTTP %s)"), status));
   }
 
   const contentLength = Number(
@@ -189,7 +236,7 @@ export async function downloadModel(
   );
   const total = contentLength > 0 ? offset + contentLength : model.sizeBytes;
   let received = offset;
-  onProgress(received, total);
+  onProgress("downloading", received, total);
 
   try {
     for (;;) {
@@ -202,7 +249,7 @@ export async function downloadModel(
       if (!data || data.length === 0) break;
       output.write_all(data, cancellable);
       received += data.length;
-      onProgress(received, total);
+      onProgress("downloading", received, total);
     }
   } finally {
     output.close(null);
@@ -211,12 +258,30 @@ export async function downloadModel(
 
   if (received < model.sizeBytes) {
     throw new Error(
-      `Download interrupted at ${formatSize(received)} of ${formatSize(model.sizeBytes)}, try again to resume`,
+      fmt(
+        _("Download interrupted at %s of %s, try again to resume"),
+        formatSize(received),
+        formatSize(model.sizeBytes),
+      ),
     );
   }
-  if (received > model.sizeBytes) {
+
+  // A resumed or tampered download can have the right size but the wrong
+  // contents, so check it before it is ever loaded.
+  const digest =
+    received === model.sizeBytes
+      ? await sha256(
+          part,
+          model.sizeBytes,
+          (done, size) => onProgress("verifying", done, size),
+          cancellable,
+        )
+      : null;
+  if (digest !== model.sha256) {
     part.delete(null);
-    throw new Error("Downloaded file does not match the expected size");
+    throw new Error(
+      _("The downloaded file is damaged. Please download it again."),
+    );
   }
 
   part.move(target, Gio.FileCopyFlags.OVERWRITE, null, null);

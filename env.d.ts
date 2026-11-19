@@ -1,11 +1,12 @@
+/// <reference types="@girs/gjs" />
+/// <reference types="@girs/gjs/dom" />
 /// <reference types="@girs/adw-1/ambient" />
-
-// Minimal fallback typing for Soup to avoid requiring a new package install
-// while still allowing strict type-check to pass.
-declare module "gi://Soup" {
-  const Soup: any;
-  export default Soup;
-}
+/// <reference types="@girs/gdk-4.0/ambient" />
+/// <reference types="@girs/gio-2.0/ambient" />
+/// <reference types="@girs/glib-2.0/ambient" />
+/// <reference types="@girs/gobject-2.0/ambient" />
+/// <reference types="@girs/gtk-4.0/ambient" />
+/// <reference types="@girs/soup-3.0/ambient" />
 
 declare namespace Config {
   export const APP_ID: string;

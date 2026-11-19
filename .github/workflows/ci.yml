@@ -1,14 +1,33 @@
-name: Flatpak Multi-Architecture Build
+name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  flatpak-multiarch:
-    name: "Flatpak Multi-Arch"
+  checks:
+    name: Lint, type-check and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run type-check
+      - run: npm test
+
+  flatpak:
+    name: Flatpak (${{ matrix.variant.arch }})
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-50
       options: --privileged
@@ -24,6 +43,8 @@ jobs:
     runs-on: ${{ matrix.variant.runner }}
     steps:
       - uses: actions/checkout@v4
+      # The build has no network access, so this also checks that
+      # generated-sources.json is in step with package-lock.json.
       - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           bundle: pipoca-${{ matrix.variant.arch }}.flatpak

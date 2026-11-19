@@ -34,6 +34,7 @@ dependency('glib-2.0', version: '>=2.84')
 dependency('gobject-2.0', version: '>=2.84')
 dependency('gtk4', version: '>=4.18')
 dependency('libadwaita-1', version: '>=1.7')
+dependency('libsoup-3.0', version: '>=3.0')
 
 configure_file(
   configuration: {
@@ -47,7 +48,7 @@ configure_file(
   input: 'bin/pipoca.in',
   install: true,
   install_dir: bindir,
-  install_mode: 'rwxr--r--',
+  install_mode: 'rwxr-xr-x',
   output: 'pipoca',
 )
 
@@ -74,7 +75,7 @@ npm_ci = custom_target(
     '--offline',
     '--omit=dev', # install only production deps (esbuild is in dependencies)
   ],
-  depend_files: files('package-lock.json', '.npmrc'),
+  depend_files: files('.npmrc', 'package-lock.json', 'package.json'),
   output: 'npm-ci',
   build_by_default: true,
 )

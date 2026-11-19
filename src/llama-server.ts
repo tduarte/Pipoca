@@ -22,7 +22,14 @@ const LOG_TAIL_LINES = 20;
 // Subtitle cues are short, so a small context keeps memory use low.
 const CONTEXT_SIZE = 4096;
 
+// A loaded model holds several GB of memory, so it is unloaded when unused.
+// It loads again on the next translation.
+const IDLE_UNLOAD_SECONDS = 10 * 60;
+
 export class EngineError extends Error {}
+
+/** The engine quit while starting, as opposed to being slow or unreachable. */
+class EngineCrashed extends EngineError {}
 
 function findServerBinary(): string | null {
   return (
@@ -68,6 +75,8 @@ export class LlamaServer {
   private _current: ServerProcess | null = null;
   private _modelPath: string | null = null;
   private _ready: Promise<void> | null = null;
+  private _requests = 0;
+  private _idleTimer = 0;
 
   /** Starts the server for `modelPath`, reusing it if that model is already loaded. */
   public ensureRunning(modelPath: string): Promise<void> {
@@ -82,18 +91,24 @@ export class LlamaServer {
 
     this.stop();
     this._modelPath = modelPath;
-    const ready = this._start(modelPath).catch((e: unknown) => {
-      if (this._ready === ready) {
-        this._ready = null;
-        this._modelPath = null;
-      }
-      throw e;
-    });
+    const ready = this._start(modelPath).then(
+      () => {
+        if (this._ready === ready) this._restartIdleTimer();
+      },
+      (e: unknown) => {
+        if (this._ready === ready) {
+          this._ready = null;
+          this._modelPath = null;
+        }
+        throw e;
+      },
+    );
     this._ready = ready;
     return ready;
   }
 
   public stop(): void {
+    this._clearIdleTimer();
     const current = this._current;
     this._current = null;
     this._ready = null;
@@ -122,11 +137,19 @@ export class LlamaServer {
       GLib.Bytes.new(payload),
     );
 
-    const bytes: GLib.Bytes = await this._session.send_and_read_async(
-      message,
-      GLib.PRIORITY_DEFAULT,
-      cancellable,
-    );
+    this._clearIdleTimer();
+    this._requests++;
+    let bytes: GLib.Bytes;
+    try {
+      bytes = await this._session.send_and_read_async(
+        message,
+        GLib.PRIORITY_DEFAULT,
+        cancellable,
+      );
+    } finally {
+      this._requests--;
+      if (this._current === current) this._restartIdleTimer();
+    }
     const text = new TextDecoder().decode(bytes.get_data() ?? new Uint8Array());
 
     if (message.get_status() !== 200) {
@@ -135,7 +158,10 @@ export class LlamaServer {
       );
     }
 
-    const content = JSON.parse(text)?.choices?.[0]?.message?.content;
+    const reply = JSON.parse(text) as {
+      choices?: {message?: {content?: unknown}}[];
+    };
+    const content = reply.choices?.[0]?.message?.content;
     if (typeof content !== "string") {
       throw new EngineError("Unexpected response from translation engine");
     }
@@ -153,7 +179,9 @@ export class LlamaServer {
     try {
       await this._spawn(binary, modelPath, []);
     } catch (e) {
-      if (!(e instanceof EngineError) || this._modelPath !== modelPath) throw e;
+      if (!(e instanceof EngineCrashed) || this._modelPath !== modelPath) {
+        throw e;
+      }
       console.warn(
         `llama-server failed to start with GPU offload, retrying on CPU: ${e.message}`,
       );
@@ -215,7 +243,7 @@ export class LlamaServer {
         throw new Error("Engine start was superseded");
       }
       if (server.exited) {
-        throw new EngineError(
+        throw new EngineCrashed(
           server.logTail.slice(-3).join("\n") ||
             "llama-server exited during startup",
         );
@@ -228,6 +256,26 @@ export class LlamaServer {
 
     process.force_exit();
     throw new EngineError("Timed out while loading the model");
+  }
+
+  private _clearIdleTimer(): void {
+    if (this._idleTimer !== 0) GLib.source_remove(this._idleTimer);
+    this._idleTimer = 0;
+  }
+
+  private _restartIdleTimer(): void {
+    this._clearIdleTimer();
+    if (this._requests > 0) return;
+    this._idleTimer = GLib.timeout_add_seconds(
+      GLib.PRIORITY_DEFAULT,
+      IDLE_UNLOAD_SECONDS,
+      () => {
+        this._idleTimer = 0;
+        console.log("Unloading the model after a period of inactivity");
+        this.stop();
+        return GLib.SOURCE_REMOVE;
+      },
+    );
   }
 
   private async _isHealthy(port: number): Promise<boolean> {
@@ -254,6 +302,7 @@ export class LlamaServer {
     const stream = Gio.DataInputStream.new(stdout);
     try {
       for (;;) {
+        // Promisified with read_line_finish_utf8, so this yields a string.
         const [line] = (await stream.read_line_async(
           GLib.PRIORITY_LOW,
           null,

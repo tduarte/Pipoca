@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      # The GNOME type definitions are released together and must match.
+      gnome-types:
+        patterns: ["@girs/*"]
+      dev-dependencies:
+        dependency-type: development
+      # esbuild and chardet are part of the Flatpak build: after merging one
+      # of these, run `npm run update-sources` and commit the result, or the
+      # offline Flatpak build in CI fails.
+      build-dependencies:
+        dependency-type: production
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

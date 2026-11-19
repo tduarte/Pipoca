@@ -1,16 +1,17 @@
 {
-  "extends": "@nyx_lyb3ra/tsconfig-gnome",
-  "exclude": ["builddir", "_build", "node_modules"],
   "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
     "module": "preserve",
+    "moduleResolution": "bundler",
+    "types": [],
     "noEmit": true,
     "strict": true,
-    "esModuleInterop": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": [
-    "src/**/*.ts",
-    "env.d.ts"
-  ]
+  "include": ["src/**/*.ts", "tests/**/*.ts", "env.d.ts"],
+  "exclude": ["builddir", "_build", "node_modules"]
 }

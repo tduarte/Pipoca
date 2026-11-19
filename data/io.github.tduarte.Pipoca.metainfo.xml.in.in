@@ -42,6 +42,8 @@
       <li>Multi-language Support: Translate to 20+ popular languages with flag emojis</li>
       <li>Guided Setup: Choose from curated translation models, sized for your computer</li>
       <li>Drag &amp; Drop: Easy file selection with visual feedback</li>
+      <li>Keeps Subtitle Layout: Line breaks, italics and speaker dashes are preserved</li>
+      <li>Stop and Resume: A stopped or interrupted translation picks up where it left off</li>
       <li>Real-time Progress: Track translation progress with GNOME HIG-compliant progress bars</li>
       <li>Privacy First: No data leaves your computer</li>
       <li>Portal-Only File Access: Uses sandbox-friendly file open/save via portals</li>
@@ -109,7 +111,7 @@
       <description>
         <p>Initial release of Pipoca - AI-powered subtitle translation</p>
         <ul>
-          <li>Core subtitle translation functionality using local Ollama models</li>
+          <li>Core subtitle translation functionality using local AI models</li>
           <li>Support for 20+ languages</li>
           <li>Smart model recommendations for translation tasks</li>
           <li>Drag &amp; drop file selection with visual feedback</li>

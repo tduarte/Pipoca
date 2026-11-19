@@ -1,30 +1,27 @@
 #!/bin/bash
 
-# Script to regenerate generated-sources.json for Flatpak builds
-# This should be run whenever package.json or package-lock.json changes
+# Regenerates generated-sources.json, the list of npm packages the Flatpak
+# build downloads up front so that it can build without network access.
+# Run this whenever package-lock.json changes.
 
-set -e
+set -euo pipefail
 
-echo "Regenerating generated-sources.json for Flatpak..."
+cd "$(dirname "$0")/.."
 
-# Check if we're in the right directory
-if [ ! -f "package.json" ] || [ ! -f "package-lock.json" ]; then
-    echo "Error: package.json or package-lock.json not found"
-    echo "Run this script from the project root directory"
-    exit 1
-fi
-
-# Check if flatpak-node-generator is available
 if ! command -v flatpak-node-generator &> /dev/null; then
     echo "Error: flatpak-node-generator not found"
-    echo "Install it with: flatpak install org.flatpak.Builder"
-    echo "Or run: sudo apt-get install flatpak-builder"
+    echo "Install it with: pipx install flatpak-node-generator"
     exit 1
 fi
 
-# Generate the sources file
-echo "Running flatpak-node-generator..."
-flatpak-node-generator npm package-lock.json
+# The generator skips packages it finds installed in node_modules, so run it
+# on a copy of the lockfile in an empty directory.
+workdir=$(mktemp -d)
+trap 'rm -rf "$workdir"' EXIT
+cp package.json package-lock.json "$workdir/"
 
-echo "Generated sources file updated successfully!"
-echo "You can now commit the updated generated-sources.json file"
+# Only build-time dependencies are needed: the build runs `npm ci --omit=dev`.
+(cd "$workdir" && flatpak-node-generator npm package-lock.json --no-devel -o generated-sources.json)
+cp "$workdir/generated-sources.json" generated-sources.json
+
+echo "generated-sources.json updated; commit it together with package-lock.json"

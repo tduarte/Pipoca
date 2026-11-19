@@ -18,8 +18,11 @@
 - **Drag & Drop Interface** - Simply drag your `.srt` files into the beautiful drop zone
 - **Local AI Translation** - Runs translation models on your own computer with a bundled [llama.cpp](https://github.com/ggml-org/llama.cpp) engine (GPU-accelerated via Vulkan)
 - **Guided Setup** - Suggests a model that suits your computer's memory and downloads it for you
-- **20+ Languages** - Supports the world's most popular languages with automatic file naming
-- **Smart Auto-Save** - Automatically saves translated files with language codes (e.g., `movie.en.srt`)
+- **20+ Languages** - Supports the world's most popular languages
+- **Keeps Subtitle Layout** - Line breaks, italics, positioning and speaker dashes survive translation
+- **Stop and Resume** - A translation that is stopped or interrupted picks up where it left off, and Pipoca asks before discarding unsaved work
+- **Reads Older Files** - Detects the text encoding of subtitles that aren't UTF-8
+- **Helpful File Names** - Suggests a name with the language code when saving (e.g., `movie.en.srt`)
 - **Modern UI** - Beautiful Libadwaita interface that follows GNOME design guidelines
 - **Real-time Progress** - Live translation progress with visual feedback
 
@@ -83,12 +86,15 @@ flatpak install flathub io.github.tduarte.Pipoca
    - Drag your `.srt` file into the drop zone OR click to select
    - Choose your target language from 20+ options
    - Click "Start Translation" and watch the magic happen! ✨
+   - Click "Save Translation" when it finishes and choose where to save the file
+
+**Use Surrounding Lines** (off by default, experimental) shows the model the subtitles before and after the one being translated. It can make dialogue read more naturally, at the cost of speed. Try it on a short file first and compare.
 
 ## 🔒 Sandbox & Portals
 
 - File access: Pipoca uses Flatpak portals exclusively. It cannot see your filesystem unless you pick a file/folder in an open/save dialog or drop a file onto the window. Drag-and-drop also goes through the document portal.
 - Open/Save: The app uses `Gtk.FileDialog`, which is portal-aware. You’ll be prompted to choose the input `.srt` and where to save the translated file.
-- Network: Used only to download models from Hugging Face. Translation runs in a private `llama-server` process bound to `127.0.0.1`; no subtitle content is sent to remote servers.
+- Network: Used only to download models from Hugging Face. Downloads are checked against their published SHA-256 checksum before use. Translation runs in a private `llama-server` process bound to `127.0.0.1`; no subtitle content is sent to remote servers.
 - GPU: `--device=dri` gives the bundled engine Vulkan access. If GPU startup fails, Pipoca falls back to the CPU.
 
 ## 🛠️ Development
@@ -100,6 +106,34 @@ flatpak install flathub io.github.tduarte.Pipoca
 - **Build System**: Meson + Flatpak
 - **AI Backend**: Bundled llama.cpp (`llama-server`, Vulkan + CPU backends)
 - **Bundler**: ESBuild
+- **Tests and Checks**: Vitest, ESLint (typescript-eslint), Prettier
+
+### Working on the Code
+
+```bash
+npm ci               # install the tools
+npm test             # unit tests (SRT parsing, layout, encodings, prompts)
+npm run lint         # ESLint
+npm run type-check   # TypeScript
+npm run format       # Prettier
+```
+
+CI runs all of these plus the Flatpak build for x86_64 and aarch64.
+
+After changing `dependencies` in `package.json` (the packages bundled into the app), regenerate the offline package list used by the Flatpak build and commit it:
+
+```bash
+pipx install flatpak-node-generator   # once
+npm run update-sources
+```
+
+To run without Flatpak you need GJS, GTK 4.18+, Libadwaita 1.7+, libsoup 3 and a `llama-server` binary:
+
+```bash
+meson setup _build --prefix="$HOME/.local" -Dcachedir="$HOME/.npm"
+meson install -C _build
+PIPOCA_LLAMA_SERVER=/path/to/llama-server pipoca
+```
 
 ### Flatpak Build Notes
 
@@ -118,14 +152,23 @@ pipoca/
 │   ├── main-window.ts            # Main window logic & UI handling
 │   ├── main-window.ui            # GTK UI definition
 │   ├── llama-server.ts           # Runs the bundled llama-server
-│   ├── models.ts                 # Model catalog & downloads
-│   └── translator.ts             # SRT parsing & prompts
+│   ├── models.ts                 # Model catalog, downloads & checksums
+│   ├── translator.ts             # Translation loop (stop & resume)
+│   ├── prompts.ts                # Prompts & sampling per model
+│   ├── srt.ts                    # SRT parsing, formatting & line layout
+│   ├── encoding.ts               # Text encoding detection
+│   ├── languages.ts              # Target languages
+│   └── i18n.ts                   # gettext helpers
+├── tests/                        # Unit tests (Vitest)
 ├── data/                         # Application data files
 │   ├── icons/                    # App icons
 │   ├── screenshots/              # Screenshots for README
+│   ├── style.css                 # Custom styles
 │   └── *.desktop.in              # Desktop entry
 ├── scripts/                      # Build scripts
-│   └── esbuild.js               # ESBuild configuration
+│   ├── esbuild.js                # ESBuild configuration
+│   └── update-sources.sh         # Regenerates generated-sources.json
+├── po/                           # Translations
 ├── io.github.tduarte.Pipoca.json # Flatpak manifest
 └── meson.build                   # Build configuration
 ```
@@ -178,7 +221,11 @@ We welcome contributions! Here's how you can help:
 
 ### Translation Contributions
 
-Help translate Pipoca into more languages! We use standard gettext (`.po`) files.
+Help translate Pipoca into more languages! We use standard gettext (`.po`) files:
+
+1. Generate the template: `meson compile -C _build pipoca-pot` (creates `po/pipoca.pot`)
+2. Create `po/<language>.po` from it, for example with [Poedit](https://poedit.net/) or `msginit`
+3. Add the language code to `po/LINGUAS`
 
 ## Troubleshooting
 
@@ -195,18 +242,19 @@ Help translate Pipoca into more languages! We use standard gettext (`.po`) files
 **Model fails to load or translation fails:**
 - Run Pipoca from a terminal to see the engine log (lines prefixed with `[llama-server]`)
 - Try a smaller model from **Manage Models**
+- If a translation fails partway, click "Resume Translation" to continue from where it stopped
 - Ensure the SRT file is properly formatted
 
 **Performance issues:**
 - Try Index-Translate 2B
-- Close other applications to free up RAM
+- Close other applications to free up RAM (the model is unloaded automatically after 10 minutes without use)
 - Make sure your GPU drivers support Vulkan (`vulkaninfo --summary`)
 
-### Debug Mode
+### Logs
 
-Run with debug output:
+Run Pipoca from a terminal to see its log, including the translation engine's output:
 ```bash
-PIPOCA_DEBUG=1 flatpak run io.github.tduarte.Pipoca
+flatpak run io.github.tduarte.Pipoca
 ```
 
 ## 📝 License
