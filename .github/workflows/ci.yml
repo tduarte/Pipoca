@@ -15,7 +15,7 @@ jobs:
     name: Lint, type-check and test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -42,7 +42,7 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.variant.runner }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # The build has no network access, so this also checks that
       # generated-sources.json is in step with package-lock.json.
       - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
