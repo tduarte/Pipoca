@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <template class="PipocaMainWindow" parent="AdwApplicationWindow">
-    <property name="default-height">400</property>
+    <property name="default-height">720</property>
     <property name="default-width">600</property>
 
     <property name="content">
@@ -22,99 +22,290 @@
                     <property name="direction">none</property>
                     <property name="menu-model">primary-menu</property>
                     <property name="primary">yes</property>
+                    <property name="tooltip-text" translatable="yes">Main Menu</property>
                   </object>
                 </child>
               </object>
             </child>
 
             <property name="content">
-          <object class="GtkStack" id="main-stack">
-            <property name="transition-type">crossfade</property>
+              <object class="GtkStack" id="main-stack">
+                <property name="transition-type">crossfade</property>
 
-            <!-- Onboarding / model manager -->
-            <child>
-              <object class="GtkStackPage">
-                <property name="name">onboarding</property>
-                <property name="child">
-                  <object class="GtkScrolledWindow">
-                    <property name="hscrollbar-policy">never</property>
+                <!-- Onboarding / model manager -->
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">onboarding</property>
                     <property name="child">
-                      <object class="AdwClamp">
-                        <property name="maximum-size">600</property>
-                        <property name="margin-top">24</property>
-                        <property name="margin-bottom">24</property>
-                        <property name="margin-start">24</property>
-                        <property name="margin-end">24</property>
-
-                        <child>
-                          <object class="GtkBox">
-                            <property name="orientation">vertical</property>
-                            <property name="spacing">24</property>
+                      <object class="GtkScrolledWindow">
+                        <property name="hscrollbar-policy">never</property>
+                        <property name="child">
+                          <object class="AdwClamp">
+                            <property name="maximum-size">600</property>
+                            <property name="margin-top">24</property>
+                            <property name="margin-bottom">24</property>
+                            <property name="margin-start">24</property>
+                            <property name="margin-end">24</property>
 
                             <child>
                               <object class="GtkBox">
                                 <property name="orientation">vertical</property>
-                                <property name="spacing">12</property>
+                                <property name="spacing">24</property>
 
                                 <child>
-                                  <object class="GtkImage" id="onboarding-icon">
-                                    <property name="pixel-size">96</property>
+                                  <object class="GtkBox">
+                                    <property name="orientation">vertical</property>
+                                    <property name="spacing">12</property>
+
+                                    <child>
+                                      <object class="GtkImage" id="onboarding-icon">
+                                        <property name="pixel-size">96</property>
+                                      </object>
+                                    </child>
+
+                                    <child>
+                                      <object class="GtkLabel" id="onboarding-title">
+                                        <property name="label" translatable="yes">Welcome to Pipoca</property>
+                                        <property name="wrap">true</property>
+                                        <property name="justify">center</property>
+                                        <style>
+                                          <class name="title-1" />
+                                        </style>
+                                      </object>
+                                    </child>
+
+                                    <child>
+                                      <object class="GtkLabel" id="onboarding-description">
+                                        <property name="label" translatable="yes">Pipoca translates subtitles entirely on your computer. Choose a translation model to download — you can add or remove models later.</property>
+                                        <property name="wrap">true</property>
+                                        <property name="justify">center</property>
+                                      </object>
+                                    </child>
                                   </object>
                                 </child>
 
                                 <child>
-                                  <object class="GtkLabel" id="onboarding-title">
-                                    <property name="label" translatable="yes">Welcome to Pipoca</property>
-                                    <property name="wrap">true</property>
-                                    <property name="justify">center</property>
+                                  <object class="AdwPreferencesGroup" id="model-choice-group">
+                                    <property name="title" translatable="yes">Translation Models</property>
+                                  </object>
+                                </child>
+
+                                <child>
+                                  <object class="GtkButton" id="download-button">
+                                    <property name="label" translatable="yes">Download Model</property>
+                                    <property name="halign">center</property>
                                     <style>
-                                      <class name="title-1" />
+                                      <class name="pill" />
+                                      <class name="suggested-action" />
                                     </style>
                                   </object>
                                 </child>
 
                                 <child>
-                                  <object class="GtkLabel" id="onboarding-description">
-                                    <property name="label" translatable="yes">Pipoca translates subtitles entirely on your computer. Choose a translation model to download — you can add or remove models later.</property>
-                                    <property name="wrap">true</property>
-                                    <property name="justify">center</property>
+                                  <object class="GtkBox">
+                                    <property name="orientation">vertical</property>
+                                    <property name="spacing">12</property>
+
+                                    <child>
+                                      <object class="GtkProgressBar" id="download-progress">
+                                        <property name="visible">false</property>
+                                        <property name="show-text">true</property>
+                                      </object>
+                                    </child>
+
+                                    <child>
+                                      <object class="GtkLabel" id="download-status">
+                                        <property name="wrap">true</property>
+                                        <property name="justify">center</property>
+                                        <style>
+                                          <class name="dim-label" />
+                                        </style>
+                                      </object>
+                                    </child>
                                   </object>
                                 </child>
                               </object>
                             </child>
+                          </object>
+                        </property>
+                      </object>
+                    </property>
+                  </object>
+                </child>
 
-                            <child>
-                              <object class="AdwPreferencesGroup" id="model-choice-group">
-                                <property name="title" translatable="yes">Translation Models</property>
-                              </object>
-                            </child>
-
-                            <child>
-                              <object class="GtkButton" id="download-button">
-                                <property name="label" translatable="yes">Download Model</property>
-                                <property name="halign">center</property>
-                                <style>
-                                  <class name="pill" />
-                                  <class name="suggested-action" />
-                                </style>
-                              </object>
-                            </child>
+                <!-- Translator -->
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">translate</property>
+                    <property name="child">
+                      <object class="GtkScrolledWindow" id="translate-page">
+                        <property name="hscrollbar-policy">never</property>
+                        <property name="child">
+                          <object class="AdwClamp">
+                            <property name="maximum-size">600</property>
+                            <property name="margin-top">24</property>
+                            <property name="margin-bottom">24</property>
+                            <property name="margin-start">24</property>
+                            <property name="margin-end">24</property>
 
                             <child>
                               <object class="GtkBox">
                                 <property name="orientation">vertical</property>
-                                <property name="spacing">12</property>
+                                <property name="spacing">24</property>
 
+                                <!-- File selection -->
                                 <child>
-                                  <object class="GtkProgressBar" id="download-progress">
-                                    <property name="visible">false</property>
-                                    <property name="show-text">true</property>
+                                  <object class="AdwPreferencesGroup">
+                                    <property name="title" translatable="yes">Source File</property>
+                                    <child>
+                                      <object class="GtkBox" id="source-area">
+                                        <property name="orientation">vertical</property>
+                                        <property name="spacing">12</property>
+                                        <style>
+                                          <class name="source-area" />
+                                        </style>
+
+                                        <!-- Drop zone -->
+                                        <child>
+                                          <object class="GtkButton" id="drop-zone-button">
+                                            <property name="height-request">120</property>
+                                            <property name="hexpand">true</property>
+                                            <property name="action-name">win.open-file</property>
+                                            <style>
+                                              <class name="card" />
+                                              <class name="drop-zone" />
+                                            </style>
+
+                                            <child>
+                                              <object class="GtkBox">
+                                                <property name="orientation">vertical</property>
+                                                <property name="spacing">8</property>
+                                                <property name="halign">center</property>
+                                                <property name="valign">center</property>
+
+                                                <child>
+                                                  <object class="GtkImage">
+                                                    <property name="icon-name">folder-download-symbolic</property>
+                                                    <property name="pixel-size">48</property>
+                                                    <property name="accessible-role">presentation</property>
+                                                    <style>
+                                                      <class name="dim-label" />
+                                                    </style>
+                                                  </object>
+                                                </child>
+
+                                                <child>
+                                                  <object class="GtkLabel">
+                                                    <property name="label" translatable="yes">Drop .srt file here or click to select</property>
+                                                    <property name="wrap">true</property>
+                                                    <property name="justify">center</property>
+                                                    <style>
+                                                      <class name="dim-label" />
+                                                    </style>
+                                                  </object>
+                                                </child>
+                                              </object>
+                                            </child>
+                                          </object>
+                                        </child>
+
+                                        <!-- Selected file -->
+                                        <child>
+                                          <object class="GtkBox" id="selected-file-display">
+                                            <property name="orientation">vertical</property>
+                                            <property name="spacing">8</property>
+                                            <property name="margin-top">12</property>
+                                            <property name="margin-bottom">12</property>
+                                            <property name="visible">false</property>
+
+                                            <child>
+                                              <object class="GtkImage">
+                                                <property name="icon-name">application-x-srt</property>
+                                                <property name="pixel-size">64</property>
+                                                <property name="accessible-role">presentation</property>
+                                              </object>
+                                            </child>
+
+                                            <child>
+                                              <object class="GtkLabel" id="file-name-label">
+                                                <property name="ellipsize">middle</property>
+                                                <property name="max-width-chars">30</property>
+                                                <property name="justify">center</property>
+                                                <style>
+                                                  <class name="title-2" />
+                                                </style>
+                                              </object>
+                                            </child>
+
+                                            <child>
+                                              <object class="GtkButton" id="change-file-button">
+                                                <property name="label" translatable="yes">Change File</property>
+                                                <property name="halign">center</property>
+                                                <property name="action-name">win.open-file</property>
+                                                <style>
+                                                  <class name="pill" />
+                                                </style>
+                                              </object>
+                                            </child>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
                                   </object>
                                 </child>
 
+                                <!-- Translation settings -->
                                 <child>
-                                  <object class="GtkLabel" id="download-status">
+                                  <object class="AdwPreferencesGroup" id="settings-group">
+                                    <property name="title" translatable="yes">Translation Settings</property>
+                                    <property name="header-suffix">
+                                      <object class="GtkButton" id="manage-models-button">
+                                        <property name="label" translatable="yes">Manage Models</property>
+                                        <property name="valign">center</property>
+                                        <property name="action-name">win.manage-models</property>
+                                        <style>
+                                          <class name="flat" />
+                                        </style>
+                                      </object>
+                                    </property>
+                                    <child>
+                                      <object class="AdwComboRow" id="target-language-row">
+                                        <property name="title" translatable="yes">Target Language</property>
+                                        <property name="subtitle" translatable="yes">Language to translate subtitles to</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="AdwComboRow" id="model-row">
+                                        <property name="title" translatable="yes">AI Model</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="AdwSwitchRow" id="context-row">
+                                        <property name="title" translatable="yes">Use Surrounding Lines</property>
+                                        <property name="subtitle" translatable="yes">Experimental. Shows the model the lines before and after each subtitle, which can read more naturally but is slower</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+
+                                <!-- Action button -->
+                                <child>
+                                  <object class="GtkButton" id="translate-button">
+                                    <property name="label" translatable="yes">Start Translation</property>
+                                    <property name="sensitive">false</property>
+                                    <property name="halign">center</property>
+                                    <style>
+                                      <class name="pill" />
+                                      <class name="suggested-action" />
+                                    </style>
+                                  </object>
+                                </child>
+
+                                <!-- Status -->
+                                <child>
+                                  <object class="GtkLabel" id="status-label">
                                     <property name="wrap">true</property>
+                                    <property name="wrap-mode">word-char</property>
                                     <property name="justify">center</property>
                                     <style>
                                       <class name="dim-label" />
@@ -124,198 +315,17 @@
                               </object>
                             </child>
                           </object>
-                        </child>
+                        </property>
                       </object>
                     </property>
                   </object>
-                </property>
-              </object>
-            </child>
-
-            <!-- Translator -->
-            <child>
-              <object class="GtkStackPage">
-                <property name="name">translate</property>
-                <property name="child">
-          <object class="AdwClamp">
-            <property name="maximum-size">600</property>
-            <property name="margin-top">24</property>
-            <property name="margin-bottom">24</property>
-            <property name="margin-start">24</property>
-            <property name="margin-end">24</property>
-            
-            <child>
-              <object class="GtkBox">
-                <property name="orientation">vertical</property>
-                <property name="spacing">24</property>
-                
-                <!-- File Selection Card -->
-                <child>
-                  <object class="AdwPreferencesGroup">
-                    <property name="title" translatable="yes">Source File</property>
-                    <child>
-                      <object class="GtkBox">
-                        <property name="orientation">vertical</property>
-                        <property name="spacing">12</property>
-                        <property name="margin-top">12</property>
-                        <property name="margin-bottom">12</property>
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                        
-                        <!-- Drop Zone -->
-                        <child>
-                          <object class="GtkButton" id="drop-zone-button">
-                            <property name="height-request">120</property>
-                            <property name="hexpand">true</property>
-                            <style>
-                              <class name="card" />
-                              <class name="drop-zone" />
-                            </style>
-                            
-                            <child>
-                              <object class="GtkBox" id="drop-zone-content">
-                                <property name="orientation">vertical</property>
-                                <property name="spacing">8</property>
-                                <property name="halign">center</property>
-                                <property name="valign">center</property>
-                                
-                                <child>
-                                  <object class="GtkImage" id="drop-zone-icon">
-                                    <property name="icon-name">folder-download-symbolic</property>
-                                    <property name="pixel-size">48</property>
-                                    <style>
-                                      <class name="dim-label" />
-                                    </style>
-                                  </object>
-                                </child>
-                                
-                                <child>
-                                  <object class="GtkLabel" id="drop-zone-label">
-                                    <property name="label" translatable="yes">Drop .srt file here or click to select</property>
-                                    <property name="wrap">true</property>
-                                    <property name="justify">center</property>
-                                    <style>
-                                      <class name="dim-label" />
-                                    </style>
-                                  </object>
-                                </child>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                        
-                        <!-- Selected File Display -->
-                        <child>
-                          <object class="GtkBox" id="selected-file-display">
-                            <property name="orientation">vertical</property>
-                            <property name="spacing">8</property>
-                            <property name="halign">center</property>
-                            <property name="visible">false</property>
-                            
-                            <child>
-                              <object class="GtkImage" id="file-type-icon">
-                                <property name="icon-name">application-x-srt</property>
-                                <property name="pixel-size">64</property>
-                              </object>
-                            </child>
-                            
-                            <child>
-                              <object class="GtkLabel" id="file-name-label">
-                                <property name="label" translatable="yes">filename.srt</property>
-                                <property name="wrap">true</property>
-                                <property name="justify">center</property>
-                                <style>
-                                  <class name="title-2" />
-                                </style>
-                              </object>
-                            </child>
-                            
-                            <child>
-                              <object class="GtkButton" id="change-file-button">
-                                <property name="label" translatable="yes">Change File</property>
-                                <property name="halign">center</property>
-                                <style>
-                                  <class name="pill" />
-                                </style>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-
-                <!-- Translation Settings Card -->
-                <child>
-                  <object class="AdwPreferencesGroup">
-                    <property name="title" translatable="yes">Translation Settings</property>
-                    <property name="header-suffix">
-                      <object class="GtkButton" id="manage-models-button">
-                        <property name="label" translatable="yes">Manage Models</property>
-                        <property name="valign">center</property>
-                        <style>
-                          <class name="flat" />
-                        </style>
-                      </object>
-                    </property>
-                    <child>
-                      <object class="AdwComboRow" id="target-language-row">
-                        <property name="title" translatable="yes">Target Language</property>
-                        <property name="subtitle" translatable="yes">Language to translate subtitles to</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="AdwComboRow" id="model-row">
-                        <property name="title" translatable="yes">AI Model</property>
-                      </object>
-                    </child>
-
-                  </object>
-                </child>
-
-                <!-- Action Button -->
-                <child>
-                  <object class="GtkButton" id="translate-button">
-                    <property name="label" translatable="yes">Start Translation</property>
-                    <property name="sensitive">false</property>
-                    <property name="halign">center</property>
-                    <style>
-                      <class name="pill" />
-                      <class name="suggested-action" />
-                    </style>
-                  </object>
-                </child>
-
-                <!-- Progress and Status -->
-                <child>
-                  <object class="GtkBox">
-                    <property name="orientation">vertical</property>
-                    <property name="spacing">12</property>
-
-                    <child>
-                      <object class="GtkLabel" id="status-label">
-                        <property name="label" translatable="yes"></property>
-                        <property name="halign">center</property>
-                        <style>
-                          <class name="dim-label" />
-                        </style>
-                      </object>
-                    </child>
-                  </object>
                 </child>
               </object>
-            </child>
-          </object>
-                </property>
-              </object>
-            </child>
-          </object>
-        </property>
+            </property>
           </object>
         </child>
-        
-        <!-- OSD Progress Bar Overlay -->
+
+        <!-- OSD progress bar -->
         <child type="overlay">
           <object class="GtkProgressBar" id="progress-bar">
             <property name="visible">false</property>

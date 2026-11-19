@@ -24,7 +24,6 @@ yarn-error.log*
 *.gmo
 
 # IDE
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -42,3 +41,6 @@ Thumbs.db
 /.flatpak
 /repo
 /flatpak-node
+
+# Local test builds
+/_build

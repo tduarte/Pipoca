@@ -2,8 +2,8 @@ import Adw from "gi://Adw";
 import GLib from "gi://GLib";
 import GObject from "gi://GObject";
 
-import MainWindow from "./main-window.js";
-import {server} from "./llama-server.js";
+import MainWindow from "./main-window";
+import {server} from "./llama-server";
 
 const options = {GTypeName: "PipocaApp"};
 
@@ -12,12 +12,8 @@ class App extends Adw.Application {
     GObject.registerClass(options, this);
   }
 
-  public quit(): void {
-    super.quit();
-  }
-
   public override vfunc_activate(): void {
-    this.activeWindow.present();
+    this.activeWindow?.present();
   }
 
   public override vfunc_shutdown(): void {
@@ -31,9 +27,14 @@ class App extends Adw.Application {
     GLib.set_application_name("Pipoca");
     GLib.set_prgname("pipoca");
 
-    this.add_action_entries([{activate: this.quit.bind(this), name: "quit"}]);
+    // Quitting closes the window rather than exiting outright, so the window
+    // gets to ask about an unsaved translation first.
+    this.add_action_entries([
+      {activate: () => this.activeWindow?.close(), name: "quit"},
+    ]);
     this.set_accels_for_action("app.quit", ["<Ctrl>Q"]);
     this.set_accels_for_action("window.close", ["<Ctrl>W"]);
+    this.set_accels_for_action("win.open-file", ["<Ctrl>O"]);
 
     new MainWindow({application: this});
   }

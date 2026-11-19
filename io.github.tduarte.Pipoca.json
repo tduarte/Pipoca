@@ -40,7 +40,11 @@
                     "type" : "git",
                     "url" : "https://github.com/KhronosGroup/SPIRV-Headers.git",
                     "tag" : "vulkan-sdk-1.4.363.0",
-                    "commit" : "496543121ce6419f23d6fa5d7194ba66c36212d2"
+                    "commit" : "496543121ce6419f23d6fa5d7194ba66c36212d2",
+                    "x-checker-data" : {
+                        "type" : "git",
+                        "tag-pattern" : "^vulkan-sdk-([\\d.]+)$"
+                    }
                 }
             ]
         },
@@ -77,7 +81,11 @@
                     "type" : "git",
                     "url" : "https://github.com/ggml-org/llama.cpp.git",
                     "tag" : "b11716",
-                    "commit" : "797de63b2fa7396dcc8caca76834c699ac84e1c3"
+                    "commit" : "797de63b2fa7396dcc8caca76834c699ac84e1c3",
+                    "x-checker-data" : {
+                        "type" : "git",
+                        "tag-pattern" : "^b(\\d+)$"
+                    }
                 }
             ]
         },

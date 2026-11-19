@@ -1,0 +1,26 @@
+.source-area {
+  padding: 12px;
+  border-radius: 12px;
+  transition: background 200ms ease;
+}
+
+/* Shown while a file is dragged over the window. */
+.source-area.drop-active {
+  background: alpha(@accent_color, 0.15);
+}
+
+.drop-zone {
+  border: 2px dashed alpha(@borders, 0.5);
+  border-radius: 12px;
+  transition: all 200ms ease;
+}
+
+.drop-zone:hover {
+  border-color: @accent_color;
+  background: alpha(@accent_color, 0.1);
+}
+
+.source-area.drop-active .drop-zone {
+  border-color: @accent_color;
+  border-style: solid;
+}

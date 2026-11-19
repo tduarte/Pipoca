@@ -6,9 +6,12 @@
   "scripts": {
     "build": "node scripts/esbuild.js src/app.ts builddir/app.js",
     "dev": "node scripts/esbuild.js src/app.ts builddir/app.js --watch",
-    "lint": "eslint src/**/*.ts",
-    "format": "prettier --write src/**/*.ts",
-    "type-check": "tsc --noEmit"
+    "lint": "eslint .",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\" \"scripts/*.js\" \"*.config.js\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\" \"scripts/*.js\" \"*.config.js\"",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "update-sources": "scripts/update-sources.sh"
   },
   "keywords": [
     "subtitle",
@@ -33,20 +36,23 @@
   },
   "homepage": "https://github.com/tduarte/Pipoca",
   "devDependencies": {
-    "@girs/adw-1": "^1.8.0-4.0.0-beta.23",
-    "@girs/gio-2.0": "^2.84.0-4.0.0-beta.23",
-    "@girs/glib-2.0": "^2.84.0-4.0.0-beta.23",
-    "@girs/gobject-2.0": "^2.84.0-4.0.0-beta.23",
-    "@girs/gtk-4.0": "^4.18.3-4.0.0-beta.23",
-    "@nyx_lyb3ra/eslint-config-gnome": "^3.0.0",
-    "@nyx_lyb3ra/tsconfig-gnome": "^3.0.1",
-    "@types/node": "^22.15.29",
-    "eslint": "^9.28.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.3",
-    "typescript-eslint": "^8.33.0"
+    "@eslint/js": "^10.0.1",
+    "@girs/adw-1": "1.8.0-4.0.0-beta.36",
+    "@girs/gdk-4.0": "4.0.0-4.0.0-beta.36",
+    "@girs/gio-2.0": "2.84.4-4.0.0-beta.36",
+    "@girs/gjs": "4.0.0-beta.36",
+    "@girs/glib-2.0": "2.84.4-4.0.0-beta.36",
+    "@girs/gobject-2.0": "2.84.4-4.0.0-beta.36",
+    "@girs/gtk-4.0": "4.19.1-4.0.0-beta.36",
+    "@girs/soup-3.0": "3.6.5-4.0.0-beta.36",
+    "eslint": "^10.15.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.73.0",
+    "vitest": "^5.1.1"
   },
   "dependencies": {
-    "esbuild": "^0.25.5"
+    "chardet": "^2.2.0",
+    "esbuild": "^0.28.2"
   }
 }

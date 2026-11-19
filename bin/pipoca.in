@@ -8,6 +8,8 @@ import {bindtextdomain, textdomain} from "gettext";
 import {exit, programArgs, programInvocationName} from "system";
 
 import "gi://Adw?version=1";
+import "gi://Gtk?version=4.0";
+import "gi://Soup?version=3.0";
 
 globalThis.Config ??= {};
 Config.APP_ID = "@app_id@";
